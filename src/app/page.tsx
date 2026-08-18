@@ -404,31 +404,31 @@ export default function Home() {
           </div>
         )}
 
-        {/* 이번 달 남은 입금액 대시보드 카드 (완료된 항목 바로 위에 배치) */}
-        <div className="mt-8 rounded-3xl bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 p-5 text-white shadow-md shadow-blue-500/20">
-          <div className="flex items-center justify-between text-blue-100">
-            <span className="text-xs font-medium flex items-center gap-1">
-              <CreditCard className="size-3.5" /> 이번 달 남은 입금액
+        {/* 이번 달 남은 입금액 대시보드 카드 (연한 하늘색 테마) */}
+        <div className="mt-8 rounded-3xl bg-gradient-to-br from-sky-50 via-sky-100/70 to-blue-100/60 dark:from-sky-950/40 dark:via-blue-950/30 dark:to-sky-900/30 p-5 border border-sky-200/80 dark:border-sky-800/50 shadow-xs">
+          <div className="flex items-center justify-between text-sky-900/80 dark:text-sky-200">
+            <span className="text-xs font-semibold flex items-center gap-1.5">
+              <CreditCard className="size-4 text-sky-600 dark:text-sky-400" /> 이번 달 남은 입금액
             </span>
-            <span className="text-xs bg-white/15 px-2 py-0.5 rounded-full backdrop-blur-xs font-medium">
+            <span className="text-xs bg-sky-200/70 dark:bg-sky-900/70 text-sky-800 dark:text-sky-200 px-2.5 py-0.5 rounded-full font-semibold">
               미완료 {incompleteTodos.length}건
             </span>
           </div>
 
-          <div className="mt-2 text-3xl font-extrabold tracking-tight">
+          <div className="mt-2 text-3xl font-extrabold tracking-tight text-sky-950 dark:text-sky-50 font-mono">
             {formatCurrency(remainingPaymentTotal)}
           </div>
 
           {/* 진행 바 */}
           {monthlyTotalPayment > 0 && (
             <div className="mt-3.5">
-              <div className="flex justify-between text-[11px] text-blue-200/90 mb-1 font-medium">
+              <div className="flex justify-between text-[11px] text-sky-700/80 dark:text-sky-300/80 mb-1.5 font-semibold">
                 <span>완료 {formatCurrency(completedPaymentTotal)}</span>
                 <span>총 {formatCurrency(monthlyTotalPayment)}</span>
               </div>
-              <div className="h-1.5 w-full bg-white/20 rounded-full overflow-hidden">
+              <div className="h-1.5 w-full bg-sky-200/80 dark:bg-sky-950 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-white rounded-full transition-all duration-500"
+                  className="h-full bg-sky-500 dark:bg-sky-400 rounded-full transition-all duration-500"
                   style={{
                     width: `${Math.min(
                       100,

@@ -61,12 +61,12 @@ export default function TodoItem({
       onDragEnd={onDragEnd}
       className={`group relative flex flex-col gap-3 rounded-2xl border p-4 transition-all duration-200 ${
         isDragging
-          ? "opacity-30 scale-[0.98] border-dashed border-primary ring-2 ring-primary/40"
+          ? "opacity-30 scale-[0.98] border-dashed border-emerald-500 ring-2 ring-emerald-400/40"
           : isDragOver
-          ? "border-primary bg-primary/5 ring-2 ring-primary/50 shadow-md"
+          ? "border-emerald-500 bg-emerald-100/50 ring-2 ring-emerald-500/50 shadow-md"
           : todo.completed
           ? "border-border/40 bg-muted/20 opacity-60"
-          : "border-border/80 bg-card shadow-xs hover:border-primary/30 hover:shadow-sm"
+          : "border-emerald-200/90 dark:border-emerald-800/60 bg-gradient-to-br from-emerald-50/90 via-emerald-50/40 to-lime-50/50 dark:from-emerald-950/30 dark:via-card dark:to-lime-950/20 shadow-xs hover:border-emerald-400 hover:shadow-sm"
       }`}
     >
       <div className="flex items-start gap-2.5">
@@ -74,7 +74,7 @@ export default function TodoItem({
         {!todo.completed && draggable && (
           <div
             title="드래그하여 순서 변경"
-            className="mt-0.5 -ml-1 flex h-6 items-center justify-center text-slate-300 hover:text-slate-600 dark:text-slate-600 dark:hover:text-slate-300 cursor-grab active:cursor-grabbing shrink-0 transition-colors"
+            className="mt-0.5 -ml-1 flex h-6 items-center justify-center text-emerald-300 hover:text-emerald-700 dark:text-emerald-700 dark:hover:text-emerald-300 cursor-grab active:cursor-grabbing shrink-0 transition-colors"
           >
             <GripVertical className="size-4" />
           </div>
@@ -87,8 +87,8 @@ export default function TodoItem({
           onClick={() => onToggle(todo)}
           className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition-all duration-200 ${
             todo.completed
-              ? "border-primary bg-primary text-primary-foreground scale-95"
-              : "border-slate-300 hover:border-primary/80 bg-background"
+              ? "border-emerald-600 bg-emerald-600 text-white scale-95"
+              : "border-emerald-400 hover:border-emerald-600 bg-background"
           }`}
         >
           {todo.completed && <Check className="size-3.5 stroke-[3]" />}
@@ -98,12 +98,12 @@ export default function TodoItem({
         <div className="min-w-0 flex-1 text-left">
           <div className="flex items-center gap-2 flex-wrap">
             {isPayment && (
-              /* 입금일 뱃지: 정확한 날짜 표시 */
+              /* 입금일 뱃지: 싱그러운 연두색 뱃지 */
               <Badge
                 variant="outline"
-                className="shrink-0 bg-blue-500/10 text-blue-700 dark:text-blue-300 font-bold text-xs px-2.5 py-0.5 rounded-lg border-blue-300 dark:border-blue-800 flex items-center gap-1"
+                className="shrink-0 bg-emerald-500/15 text-emerald-800 dark:text-emerald-200 font-bold text-xs px-2.5 py-0.5 rounded-lg border-emerald-300 dark:border-emerald-700 flex items-center gap-1"
               >
-                <Calendar className="size-3.5 text-blue-600 dark:text-blue-400" />
+                <Calendar className="size-3.5 text-emerald-700 dark:text-emerald-400" />
                 {todo.month && todo.paymentDay
                   ? `${todo.month}월 ${todo.paymentDay}일 입금`
                   : todo.paymentDay
@@ -114,10 +114,10 @@ export default function TodoItem({
               </Badge>
             )}
             <span
-              className={`text-base font-medium break-keep leading-snug ${
+              className={`text-base font-semibold break-keep leading-snug ${
                 todo.completed
-                  ? "text-muted-foreground line-through decoration-slate-400"
-                  : "text-foreground"
+                  ? "text-muted-foreground line-through decoration-slate-400 font-normal"
+                  : "text-emerald-950 dark:text-emerald-50"
               }`}
             >
               {todo.title}
@@ -127,12 +127,12 @@ export default function TodoItem({
           {/* 입금 세부정보 영역 */}
           {isPayment && (
             <div className="mt-2.5 flex flex-col gap-2">
-              <div className="flex items-center justify-between rounded-xl bg-slate-50 dark:bg-muted/30 p-2.5 border border-border/50">
+              <div className="flex items-center justify-between rounded-xl bg-white/90 dark:bg-card/90 p-2.5 border border-emerald-200/70 dark:border-emerald-900/50 shadow-2xs">
                 <div className="flex items-baseline gap-1.5">
                   <span className="text-xs text-muted-foreground font-semibold">송금액</span>
                   <span
                     className={`text-lg font-extrabold ${
-                      todo.completed ? "text-muted-foreground" : "text-blue-600 dark:text-blue-400"
+                      todo.completed ? "text-muted-foreground" : "text-emerald-700 dark:text-emerald-400 font-mono"
                     }`}
                   >
                     {formatCurrency(todo.amount ?? 0)}
@@ -144,7 +144,7 @@ export default function TodoItem({
               {todo.bank && todo.accountNumber && (
                 <div
                   onClick={handleCopy}
-                  className="flex items-center justify-between rounded-xl bg-slate-50 dark:bg-muted/40 border border-slate-200/70 dark:border-border/60 px-3 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-100/80 active:scale-[0.99] transition-all cursor-pointer group/chip"
+                  className="flex items-center justify-between rounded-xl bg-white/90 dark:bg-card/90 border border-emerald-200/70 dark:border-emerald-900/50 px-3 py-2 text-xs text-slate-800 dark:text-slate-200 hover:bg-emerald-50/80 active:scale-[0.99] transition-all cursor-pointer group/chip"
                 >
                   <div className="flex items-center gap-1.5 truncate">
                     <span className="font-semibold text-foreground">{todo.bank}</span>
@@ -153,7 +153,7 @@ export default function TodoItem({
                       <span className="text-muted-foreground">({todo.recipient})</span>
                     )}
                   </div>
-                  <div className="flex items-center gap-1 shrink-0 ml-2 font-medium text-primary text-[11px]">
+                  <div className="flex items-center gap-1 shrink-0 ml-2 font-semibold text-emerald-700 dark:text-emerald-400 text-[11px]">
                     {copied ? (
                       <>
                         <Check className="size-3.5 text-emerald-600" />
@@ -161,7 +161,7 @@ export default function TodoItem({
                       </>
                     ) : (
                       <>
-                        <Copy className="size-3.5 text-muted-foreground group-hover/chip:text-primary transition-colors" />
+                        <Copy className="size-3.5 text-muted-foreground group-hover/chip:text-emerald-700 transition-colors" />
                         <span>복사</span>
                       </>
                     )}
