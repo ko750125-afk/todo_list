@@ -59,14 +59,14 @@ export default function TodoItem({
       onDragLeave={onDragLeave}
       onDrop={onDrop}
       onDragEnd={onDragEnd}
-      className={`group relative flex flex-col gap-3 rounded-2xl border p-4 transition-all duration-200 ${
+      className={`group relative flex flex-col gap-3 rounded-2xl p-4 transition-all duration-200 ${
         isDragging
-          ? "opacity-30 scale-[0.98] border-dashed border-zinc-900 dark:border-white ring-2 ring-zinc-400/40"
+          ? "opacity-30 scale-[0.98] border-2 border-dashed border-zinc-900 dark:border-white ring-2 ring-zinc-400/40"
           : isDragOver
-          ? "border-zinc-900 dark:border-white bg-zinc-100 dark:bg-zinc-800 ring-2 ring-zinc-900/40 dark:ring-white/40 shadow-md"
+          ? "border-2 border-zinc-900 dark:border-white bg-zinc-100 dark:bg-zinc-800 ring-2 ring-zinc-900/40 dark:ring-white/40 shadow-md"
           : todo.completed
-          ? "border-zinc-200/60 dark:border-zinc-800/40 bg-zinc-50/50 dark:bg-zinc-900/20 opacity-50"
-          : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xs hover:border-zinc-900 dark:hover:border-zinc-400 hover:shadow-sm"
+          ? "border border-zinc-200/60 dark:border-zinc-800/40 bg-zinc-50/50 dark:bg-zinc-900/20 opacity-50"
+          : "border-2 border-zinc-900 dark:border-white bg-white dark:bg-zinc-900 shadow-sm hover:shadow-md hover:-translate-y-0.5"
       }`}
     >
       <div className="flex items-start gap-2.5">
