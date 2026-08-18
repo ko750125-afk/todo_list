@@ -116,7 +116,7 @@ export async function generateDueRecurringTodos(): Promise<void> {
 
     for (const occurrence of candidates) {
       const triggerDate = new Date(occurrence.date);
-      triggerDate.setDate(triggerDate.getDate() - 7);
+      triggerDate.setDate(triggerDate.getDate() - 3);
 
       if (today >= triggerDate) {
         await createPaymentTodoIfMissing(payment, occurrence);
