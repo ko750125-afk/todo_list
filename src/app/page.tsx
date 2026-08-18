@@ -99,22 +99,28 @@ export default function Home() {
     [todos]
   );
 
-  // 이번 달 남은 입금 및 총 입금 계산
+  // 이번 달 남은 입금 및 총 입금 계산 (정기입금 원본 기준 + 실시간 남은 입금액)
   const { remainingPaymentTotal, monthlyTotalPayment, completedPaymentTotal } = useMemo(() => {
-    const paymentsThisMonth = (todos ?? []).filter(
-      (t) => t.type === "payment" && t.year === currentYear && t.month === currentMonth
-    );
-    const total = paymentsThisMonth.reduce((sum, t) => sum + (t.amount ?? 0), 0);
-    const remaining = paymentsThisMonth
-      .filter((t) => !t.completed)
+    // 1. 활성화된 정기입금 원본 총합
+    const activeRecurringTotal = Array.from(recurringMap.values())
+      .filter((p) => p.active !== false)
+      .reduce((sum, p) => sum + (p.amount ?? 0), 0);
+
+    // 2. 현재 남아있는 미완료 입금 카드의 총합
+    const remaining = (todos ?? [])
+      .filter((t) => t.type === "payment" && !t.completed)
       .reduce((sum, t) => sum + (t.amount ?? 0), 0);
-    const completed = total - remaining;
+
+    // 정기입금 원본 총합이 있으면 그것을 총액으로 하고, 없으면 남아있는 금액 기준
+    const total = activeRecurringTotal > 0 ? activeRecurringTotal : remaining;
+    const completed = Math.max(0, total - remaining);
+
     return {
       monthlyTotalPayment: total,
       remainingPaymentTotal: remaining,
       completedPaymentTotal: completed,
     };
-  }, [todos, currentYear, currentMonth]);
+  }, [todos, recurringMap]);
 
   // 필터링 적용
   const filteredIncomplete = useMemo(() => {
@@ -137,11 +143,11 @@ export default function Home() {
     });
   }, [filteredIncomplete]);
 
+  // 완료 목록: 일반 할일만 표시 (입금 카드는 체크 시 완전히 삭제되어 정리됨)
   const filteredCompleted = useMemo(() => {
     return completedTodos.filter((t) => {
-      if (filter === "payment") return t.type === "payment";
-      if (filter === "normal") return t.type !== "payment";
-      return true;
+      if (filter === "payment") return false;
+      return t.type !== "payment";
     });
   }, [completedTodos, filter]);
 
@@ -212,6 +218,14 @@ export default function Home() {
 
   const handleToggle = async (todo: Todo) => {
     try {
+      // 1. 입금 카드의 경우: 체크 즉시 삭제되어 화면에서 깨끗하게 사라짐!
+      if (todo.type === "payment") {
+        await deleteDoc(doc(db, TODOS_COLLECTION, todo.id));
+        toast.success("입금이 완료되어 목록에서 정리되었습니다! 💸");
+        return;
+      }
+
+      // 2. 일반 할일의 경우: 완료 처리되어 아래 완료 목록으로 이동
       await updateDoc(doc(db, TODOS_COLLECTION, todo.id), {
         completed: !todo.completed,
         completedAt: !todo.completed ? Timestamp.now() : deleteField(),
