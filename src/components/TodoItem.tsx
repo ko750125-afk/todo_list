@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Copy, Check, Trash2, Edit2, ArrowUpRight, Calendar, GripVertical } from "lucide-react";
+import { Copy, Check, Trash2, Calendar, GripVertical } from "lucide-react";
 import type { Todo } from "@/types/todo";
 import { formatCurrency } from "@/utils/format";
 import { Badge } from "@/components/ui/badge";
@@ -98,30 +98,20 @@ export default function TodoItem({
         <div className="min-w-0 flex-1 text-left">
           <div className="flex items-center gap-2 flex-wrap">
             {isPayment && (
-              <>
-                <Badge
-                  variant="secondary"
-                  className="shrink-0 bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-300 border border-blue-200/60 font-semibold px-2 py-0.5 text-xs rounded-lg"
-                >
-                  <ArrowUpRight className="size-3 mr-0.5 inline" />
-                  입금
-                </Badge>
-
-                {/* 입금일 뱃지: 정확한 날짜 표시 */}
-                <Badge
-                  variant="outline"
-                  className="shrink-0 bg-blue-500/10 text-blue-700 dark:text-blue-300 font-bold text-xs px-2.5 py-0.5 rounded-lg border-blue-300 dark:border-blue-800 flex items-center gap-1"
-                >
-                  <Calendar className="size-3.5 text-blue-600 dark:text-blue-400" />
-                  {todo.month && todo.paymentDay
-                    ? `${todo.month}월 ${todo.paymentDay}일 입금`
-                    : todo.paymentDay
-                    ? `매월 ${todo.paymentDay}일 입금`
-                    : todo.month
-                    ? `${todo.month}월 입금`
-                    : "입금"}
-                </Badge>
-              </>
+              /* 입금일 뱃지: 정확한 날짜 표시 */
+              <Badge
+                variant="outline"
+                className="shrink-0 bg-blue-500/10 text-blue-700 dark:text-blue-300 font-bold text-xs px-2.5 py-0.5 rounded-lg border-blue-300 dark:border-blue-800 flex items-center gap-1"
+              >
+                <Calendar className="size-3.5 text-blue-600 dark:text-blue-400" />
+                {todo.month && todo.paymentDay
+                  ? `${todo.month}월 ${todo.paymentDay}일 입금`
+                  : todo.paymentDay
+                  ? `매월 ${todo.paymentDay}일 입금`
+                  : todo.month
+                  ? `${todo.month}월 입금`
+                  : "입금"}
+              </Badge>
             )}
             <span
               className={`text-base font-medium break-keep leading-snug ${
