@@ -474,8 +474,7 @@ export default function Home() {
 
       {showAddForm && (
         <TodoForm
-          recurringPayments={Array.from(recurringMap.values()).filter((p) => p.active !== false)}
-          onSubmit={(data) => handleAdd(data as any)}
+          onSubmit={(data) => handleAdd(data as { title: string; dueDate?: string })}
           onClose={() => setShowAddForm(false)}
         />
       )}

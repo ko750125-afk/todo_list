@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import type { Todo } from "@/types/todo";
-import type { RecurringPayment } from "@/types/recurringPayment";
 import {
   Dialog,
   DialogContent,
@@ -17,13 +16,6 @@ import { useDraggableModal } from "@/hooks/useDraggableModal";
 interface NewTodoInput {
   title: string;
   dueDate?: string;
-  type?: "normal" | "payment";
-  paymentId?: string;
-  amount?: number;
-  bank?: string;
-  accountNumber?: string;
-  recipient?: string;
-  paymentDay?: number;
 }
 
 interface EditTodoInput {
@@ -38,12 +30,11 @@ interface EditTodoInput {
 
 interface TodoFormProps {
   todo?: Todo;
-  recurringPayments?: RecurringPayment[];
   onSubmit: (data: NewTodoInput | EditTodoInput) => void;
   onClose: () => void;
 }
 
-export default function TodoForm({ todo, recurringPayments, onSubmit, onClose }: TodoFormProps) {
+export default function TodoForm({ todo, onSubmit, onClose }: TodoFormProps) {
   const isEdit = Boolean(todo);
   const isPayment = todo?.type === "payment";
 
@@ -136,41 +127,6 @@ export default function TodoForm({ todo, recurringPayments, onSubmit, onClose }:
           </DialogHeader>
 
           <div className="flex flex-col gap-4">
-            {/* 정기입금에서 빠른 추가 칩 (신규 등록 시) */}
-            {!isEdit && recurringPayments && recurringPayments.length > 0 && (
-              <div className="flex flex-col gap-2 p-3 rounded-2xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
-                <span className="text-[11px] font-bold text-zinc-600 dark:text-zinc-400">
-                  📌 정기입금에서 바로 올리기
-                </span>
-                <div className="flex flex-wrap gap-1.5">
-                  {recurringPayments.map((p) => (
-                    <button
-                      key={p.id}
-                      type="button"
-                      onClick={() => {
-                        onSubmit({
-                          title: `${p.recipient} 입금`,
-                          type: "payment",
-                          paymentId: p.id,
-                          amount: p.amount,
-                          bank: p.bank || "",
-                          accountNumber: p.accountNumber || "",
-                          recipient: p.recipient,
-                          paymentDay: p.paymentDay,
-                        });
-                      }}
-                      className="px-2.5 py-1.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 hover:bg-zinc-900 hover:text-white dark:hover:bg-white dark:hover:text-zinc-900 text-xs font-semibold text-zinc-900 dark:text-zinc-100 transition-all active:scale-95 shadow-2xs flex items-center gap-1.5"
-                    >
-                      <span>{p.recipient}</span>
-                      <span className="text-[11px] text-zinc-500 dark:text-zinc-400 font-mono">
-                        {p.amount?.toLocaleString()}원
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
             {/* 할일 내용 */}
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="todo-title" className="text-xs font-semibold text-muted-foreground">
