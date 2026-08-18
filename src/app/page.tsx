@@ -294,7 +294,7 @@ export default function Home() {
       <header className="pt-7 pb-4">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-foreground">
-            {currentMonth}월 할일 & 입금
+            Todo List
           </h1>
           <span className="text-xs px-2.5 py-1 rounded-full bg-slate-100 dark:bg-muted text-muted-foreground font-medium">
             {now.toLocaleDateString("ko-KR", { month: "short", day: "numeric", weekday: "short" })}
