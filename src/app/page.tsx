@@ -239,7 +239,7 @@ export default function Home() {
     }
   };
 
-  const handleAdd = async (data: { title: string }) => {
+  const handleAdd = async (data: { title: string; dueDate?: string }) => {
     try {
       // 새로운 할일은 가장 높은 우선순위 (가장 작은 order)
       const minOrder = (rawTodos ?? []).reduce(
@@ -250,6 +250,7 @@ export default function Home() {
         title: data.title,
         completed: false,
         type: "normal",
+        dueDate: data.dueDate || null,
         order: minOrder - 1,
         createdAt: Timestamp.now(),
       });
@@ -263,6 +264,7 @@ export default function Home() {
 
   const handleEditSave = async (data: {
     title: string;
+    dueDate?: string;
     recipient?: string;
     amount?: number;
     bank?: string;
@@ -271,7 +273,15 @@ export default function Home() {
   }) => {
     if (!editingTodo) return;
     try {
-      await updateDoc(doc(db, TODOS_COLLECTION, editingTodo.id), { ...data });
+      await updateDoc(doc(db, TODOS_COLLECTION, editingTodo.id), {
+        title: data.title,
+        dueDate: data.dueDate || deleteField(),
+        ...(data.recipient !== undefined && { recipient: data.recipient }),
+        ...(data.amount !== undefined && { amount: data.amount }),
+        ...(data.bank !== undefined && { bank: data.bank }),
+        ...(data.accountNumber !== undefined && { accountNumber: data.accountNumber }),
+        ...(data.paymentDay !== undefined && { paymentDay: data.paymentDay }),
+      });
       setEditingTodo(null);
       toast.success("수정되었습니다.");
     } catch (err) {
@@ -495,7 +505,7 @@ export default function Home() {
 
       {showAddForm && (
         <TodoForm
-          onSubmit={(data) => handleAdd(data as { title: string })}
+          onSubmit={(data) => handleAdd(data as { title: string; dueDate?: string })}
           onClose={() => setShowAddForm(false)}
         />
       )}

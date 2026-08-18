@@ -7,6 +7,7 @@ export interface Todo {
   title: string;
   completed: boolean;
   type: TodoType;
+  dueDate?: string; // YYYY-MM-DD 형식 (선택 사항)
   paymentId?: string;
   amount?: number;
   bank?: string;
@@ -19,5 +20,6 @@ export interface Todo {
   createdAt: Timestamp;
   completedAt?: Timestamp;
 }
+
 
 

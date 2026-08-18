@@ -97,7 +97,7 @@ export default function TodoItem({
         {/* 메인 내용 영역 (클릭 편집 제거) */}
         <div className="min-w-0 flex-1 text-left">
           <div className="flex items-center gap-2 flex-wrap">
-            {isPayment && (
+            {isPayment ? (
               /* 입금일 뱃지: 싱그러운 연두색 뱃지 */
               <Badge
                 variant="outline"
@@ -112,6 +112,22 @@ export default function TodoItem({
                   ? `${todo.month}월 입금`
                   : "입금"}
               </Badge>
+            ) : (
+              todo.dueDate && (
+                /* 일반 할일 날짜 / 마감일 뱃지 */
+                <Badge
+                  variant="outline"
+                  className="shrink-0 bg-emerald-500/10 text-emerald-800 dark:text-emerald-200 font-semibold text-xs px-2 py-0.5 rounded-lg border-emerald-300 dark:border-emerald-700 flex items-center gap-1"
+                >
+                  <Calendar className="size-3 text-emerald-600 dark:text-emerald-400" />
+                  {(() => {
+                    const todayStr = new Date().toISOString().split("T")[0];
+                    const [y, m, d] = todo.dueDate.split("-").map(Number);
+                    if (todo.dueDate === todayStr) return "오늘 마감";
+                    return `${m}월 ${d}일`;
+                  })()}
+                </Badge>
+              )
             )}
             <span
               className={`text-base font-semibold break-keep leading-snug ${
