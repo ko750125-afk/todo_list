@@ -1,16 +1,19 @@
-import { Calendar, Building2, ChevronRight } from "lucide-react";
+import { Calendar, Building2, Plus } from "lucide-react";
 import type { RecurringPayment } from "@/types/recurringPayment";
 import { formatCurrency } from "@/utils/format";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 interface RecurringPaymentListProps {
   payments: RecurringPayment[];
   onSelect: (payment: RecurringPayment) => void;
+  onAddToTodo?: (payment: RecurringPayment) => void;
 }
 
 export default function RecurringPaymentList({
   payments,
   onSelect,
+  onAddToTodo,
 }: RecurringPaymentListProps) {
   // 매월 입금일 순으로 정렬 (1일 -> 31일)
   const sortedPayments = [...payments].sort((a, b) => a.paymentDay - b.paymentDay);
@@ -58,13 +61,29 @@ export default function RecurringPaymentList({
             </div>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0 ml-3">
+          <div className="flex items-center gap-3 shrink-0 ml-3">
             <div className="text-right">
               <div className="text-base font-extrabold text-zinc-900 dark:text-white font-mono">
                 {formatCurrency(payment.amount)}
               </div>
             </div>
-            <ChevronRight className="size-4 text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white group-hover:translate-x-0.5 transition-all" />
+
+            {onAddToTodo && (
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                title="투두리스트에 지금 올리기"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onAddToTodo(payment);
+                }}
+                className="h-9 px-3 rounded-xl text-xs font-semibold border-zinc-300 dark:border-zinc-700 bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100 shadow-2xs flex items-center gap-1 shrink-0"
+              >
+                <Plus className="size-3.5 stroke-[2.5]" />
+                <span>투두 올리기</span>
+              </Button>
+            )}
           </div>
         </div>
       ))}

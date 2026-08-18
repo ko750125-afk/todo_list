@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { db, RECURRING_PAYMENTS_COLLECTION } from "@/lib/firebase";
 import type { RecurringPayment } from "@/types/recurringPayment";
 import { formatCurrency } from "@/utils/format";
+import { createManualRecurringTodo } from "@/utils/recurringTodo";
 import RecurringPaymentList from "@/components/RecurringPaymentList";
 import RecurringPaymentForm, {
   RecurringPaymentInput,
@@ -103,6 +104,17 @@ export default function RecurringPage() {
     }
   };
 
+  // 정기입금을 사용자가 즉시 투두리스트에 올리기
+  const handleAddToTodo = async (payment: RecurringPayment) => {
+    try {
+      await createManualRecurringTodo(payment);
+      toast.success(`'${payment.recipient}' 입금이 Todo List에 등록되었습니다! 📋`);
+    } catch (err) {
+      console.error(err);
+      toast.error("투두리스트 등록에 실패했습니다.");
+    }
+  };
+
   return (
     <div className="flex flex-1 flex-col px-4 sm:px-6">
       {/* 헤더 및 요약 카드 */}
@@ -131,7 +143,7 @@ export default function RecurringPage() {
               onClick={() => setShowGuide(false)}
               className="mt-3 flex items-center justify-between rounded-xl bg-zinc-800/80 px-3 py-2 text-[11px] text-zinc-300 cursor-pointer hover:bg-zinc-800 transition-all group"
             >
-              <span>💡 매월 지정일 7일 전에 할일 목록으로 자동 등록됩니다.</span>
+              <span>💡 '투두 올리기' 버튼을 누르면 필요할 때 즉시 할일 목록에 등록됩니다.</span>
               <span className="text-[10px] text-zinc-400 group-hover:text-white ml-2 shrink-0">✕</span>
             </div>
           )}
@@ -172,6 +184,7 @@ export default function RecurringPage() {
             <RecurringPaymentList
               payments={activePayments}
               onSelect={setEditingPayment}
+              onAddToTodo={handleAddToTodo}
             />
           </div>
         )}

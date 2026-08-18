@@ -4,6 +4,7 @@ import {
   getDocs,
   query,
   runTransaction,
+  setDoc,
   Timestamp,
   where,
 } from "firebase/firestore";
@@ -76,6 +77,28 @@ async function createPaymentTodoIfMissing(
   });
 }
 
+export async function createManualRecurringTodo(payment: RecurringPayment): Promise<void> {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth() + 1;
+
+  const todoRef = doc(collection(db, TODOS_COLLECTION));
+  await setDoc(todoRef, {
+    title: `${payment.recipient} 입금`,
+    completed: false,
+    type: "payment",
+    paymentId: payment.id,
+    amount: payment.amount,
+    bank: payment.bank || "",
+    accountNumber: payment.accountNumber || "",
+    recipient: payment.recipient,
+    year,
+    month,
+    paymentDay: payment.paymentDay,
+    createdAt: Timestamp.now(),
+  });
+}
+
 export async function generateDueRecurringTodos(): Promise<void> {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -101,3 +124,5 @@ export async function generateDueRecurringTodos(): Promise<void> {
     }
   }
 }
+
+

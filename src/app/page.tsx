@@ -215,23 +215,46 @@ export default function Home() {
     }
   };
 
-  const handleAdd = async (data: { title: string; dueDate?: string }) => {
+  const handleAdd = async (data: {
+    title: string;
+    dueDate?: string;
+    type?: "normal" | "payment";
+    paymentId?: string;
+    amount?: number;
+    bank?: string;
+    accountNumber?: string;
+    recipient?: string;
+    paymentDay?: number;
+  }) => {
     try {
       // 새로운 할일은 가장 높은 우선순위 (가장 작은 order)
       const minOrder = (rawTodos ?? []).reduce(
         (min, t) => (t.order !== undefined && t.order < min ? t.order : min),
         0
       );
+      const isPayment = data.type === "payment";
+      const now = new Date();
+
       await addDoc(collection(db, TODOS_COLLECTION), {
         title: data.title,
         completed: false,
-        type: "normal",
+        type: isPayment ? "payment" : "normal",
         dueDate: data.dueDate || null,
+        ...(isPayment && {
+          paymentId: data.paymentId || null,
+          amount: data.amount || 0,
+          bank: data.bank || "",
+          accountNumber: data.accountNumber || "",
+          recipient: data.recipient || "",
+          year: now.getFullYear(),
+          month: now.getMonth() + 1,
+          paymentDay: data.paymentDay || null,
+        }),
         order: minOrder - 1,
         createdAt: Timestamp.now(),
       });
       setShowAddForm(false);
-      toast.success("새 할일이 등록되었습니다.");
+      toast.success(isPayment ? "입금 카드가 등록되었습니다. 💸" : "새 할일이 등록되었습니다.");
     } catch (err) {
       console.error(err);
       toast.error("저장하지 못했습니다. 다시 시도해주세요.");
@@ -451,7 +474,8 @@ export default function Home() {
 
       {showAddForm && (
         <TodoForm
-          onSubmit={(data) => handleAdd(data as { title: string; dueDate?: string })}
+          recurringPayments={Array.from(recurringMap.values()).filter((p) => p.active !== false)}
+          onSubmit={(data) => handleAdd(data as any)}
           onClose={() => setShowAddForm(false)}
         />
       )}
