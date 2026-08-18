@@ -111,28 +111,28 @@ export default function RecurringPage() {
           매월 정기입금 관리
         </h1>
 
-        {/* 요약 카드 */}
-        <div className="mt-4 rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 p-5 text-white shadow-md shadow-slate-900/10">
-          <div className="flex items-center justify-between text-slate-300">
-            <span className="text-xs font-medium flex items-center gap-1">
-              <CreditCard className="size-3.5 text-blue-400" /> 월 고정 입금 합계
+        {/* 요약 카드 (흑백 투톤) */}
+        <div className="mt-4 rounded-3xl bg-zinc-900 p-5 text-white shadow-md border border-zinc-800">
+          <div className="flex items-center justify-between text-zinc-400">
+            <span className="text-xs font-medium flex items-center gap-1.5">
+              <CreditCard className="size-3.5 text-zinc-300" /> 월 고정 입금 합계
             </span>
-            <span className="text-xs bg-white/10 px-2.5 py-0.5 rounded-full font-medium">
+            <span className="text-xs bg-zinc-800 text-zinc-200 px-2.5 py-0.5 rounded-full font-medium">
               총 {activePayments.length}건
             </span>
           </div>
 
-          <div className="mt-2 text-3xl font-extrabold tracking-tight">
+          <div className="mt-2 text-3xl font-extrabold tracking-tight font-mono">
             {formatCurrency(totalMonthlyAmount)}
           </div>
 
           {showGuide && (
             <div
               onClick={() => setShowGuide(false)}
-              className="mt-3 flex items-center justify-between rounded-xl bg-white/10 px-3 py-2 text-[11px] text-slate-300/90 cursor-pointer hover:bg-white/15 transition-all group"
+              className="mt-3 flex items-center justify-between rounded-xl bg-zinc-800/80 px-3 py-2 text-[11px] text-zinc-300 cursor-pointer hover:bg-zinc-800 transition-all group"
             >
               <span>💡 매월 지정일 7일 전에 할일 목록으로 자동 등록됩니다.</span>
-              <span className="text-[10px] text-slate-400 group-hover:text-white ml-2 shrink-0">✕</span>
+              <span className="text-[10px] text-zinc-400 group-hover:text-white ml-2 shrink-0">✕</span>
             </div>
           )}
         </div>
@@ -142,18 +142,18 @@ export default function RecurringPage() {
       <main className="flex-1 pb-6">
         {payments === null && (
           <div className="py-16 text-center">
-            <div className="inline-block size-6 animate-spin rounded-full border-2 border-primary border-t-transparent mb-2" />
-            <p className="text-sm text-muted-foreground">데이터를 불러오는 중...</p>
+            <div className="inline-block size-6 animate-spin rounded-full border-2 border-zinc-900 dark:border-white border-t-transparent mb-2" />
+            <p className="text-sm text-zinc-500">데이터를 불러오는 중...</p>
           </div>
         )}
 
         {payments !== null && activePayments.length === 0 && (
           <div className="py-16 text-center flex flex-col items-center justify-center">
-            <div className="size-12 rounded-full bg-slate-100 dark:bg-muted flex items-center justify-center text-muted-foreground mb-3">
+            <div className="size-12 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-500 mb-3">
               <CalendarClock className="size-6" />
             </div>
-            <p className="font-semibold text-foreground">등록된 정기입금이 없습니다</p>
-            <p className="text-xs text-muted-foreground mt-1 whitespace-pre-line">
+            <p className="font-semibold text-zinc-900 dark:text-zinc-100">등록된 정기입금이 없습니다</p>
+            <p className="text-xs text-zinc-500 mt-1 whitespace-pre-line">
               {"매달 직접 계좌이체해야 하는 항목을\n하단 + 버튼을 눌러 등록해 보세요."}
             </p>
           </div>
@@ -162,10 +162,10 @@ export default function RecurringPage() {
         {payments !== null && activePayments.length > 0 && (
           <div className="mt-2">
             <div className="flex items-center justify-between mb-3 px-1">
-              <h2 className="text-xs font-bold text-muted-foreground tracking-wide uppercase">
+              <h2 className="text-xs font-bold text-zinc-500 tracking-wide uppercase">
                 등록된 정기입금 목록
               </h2>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-xs text-zinc-500">
                 입금일 빠른 순
               </span>
             </div>
@@ -184,7 +184,7 @@ export default function RecurringPage() {
             type="button"
             aria-label="정기입금 추가"
             onClick={() => setShowAddForm(true)}
-            className="pointer-events-auto h-14 w-14 rounded-full p-0 shadow-lg shadow-primary/30 bg-primary hover:bg-primary/90 text-primary-foreground hover:scale-105 active:scale-95 transition-all duration-200"
+            className="pointer-events-auto h-14 w-14 rounded-full p-0 shadow-lg shadow-zinc-900/20 bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100 hover:scale-105 active:scale-95 transition-all duration-200"
           >
             <Plus className="size-6 stroke-[2.5]" />
           </Button>

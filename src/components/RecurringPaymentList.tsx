@@ -29,29 +29,29 @@ export default function RecurringPaymentList({
               onSelect(payment);
             }
           }}
-          className="group relative flex items-center justify-between rounded-2xl border border-border/80 bg-card p-4 shadow-xs hover:border-primary/40 hover:shadow-sm transition-all duration-200 cursor-pointer text-left"
+          className="group relative flex items-center justify-between rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 shadow-xs hover:border-zinc-900 dark:hover:border-zinc-400 hover:shadow-sm transition-all duration-200 cursor-pointer text-left"
         >
           <div className="flex items-start gap-3 min-w-0 flex-1">
-            <div className="mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-950/50 text-primary border border-blue-100 dark:border-blue-900/40">
+            <div className="mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-700">
               <Building2 className="size-5" />
             </div>
 
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-base font-bold text-foreground">
+                <span className="text-base font-bold text-zinc-900 dark:text-zinc-100">
                   {payment.recipient}
                 </span>
                 <Badge
                   variant="outline"
-                  className="bg-slate-50 dark:bg-muted font-semibold text-slate-700 dark:text-slate-300 text-xs px-2 py-0.5 rounded-lg border-slate-200/80"
+                  className="bg-zinc-100 dark:bg-zinc-800 font-semibold text-zinc-800 dark:text-zinc-200 text-xs px-2 py-0.5 rounded-lg border-zinc-300 dark:border-zinc-700"
                 >
-                  <Calendar className="size-3 mr-1 inline text-primary" />
+                  <Calendar className="size-3 mr-1 inline text-zinc-600 dark:text-zinc-400" />
                   매월 {payment.paymentDay}일
                 </Badge>
               </div>
 
               {(payment.bank || payment.accountNumber) && (
-                <div className="mt-1 text-xs text-muted-foreground font-medium truncate">
+                <div className="mt-1 text-xs text-zinc-500 font-medium truncate">
                   {payment.bank} <span className="font-mono">{payment.accountNumber}</span>
                 </div>
               )}
@@ -60,11 +60,11 @@ export default function RecurringPaymentList({
 
           <div className="flex items-center gap-2 shrink-0 ml-3">
             <div className="text-right">
-              <div className="text-base font-extrabold text-foreground">
+              <div className="text-base font-extrabold text-zinc-900 dark:text-white font-mono">
                 {formatCurrency(payment.amount)}
               </div>
             </div>
-            <ChevronRight className="size-4 text-muted-foreground/60 group-hover:text-foreground group-hover:translate-x-0.5 transition-all" />
+            <ChevronRight className="size-4 text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white group-hover:translate-x-0.5 transition-all" />
           </div>
         </div>
       ))}

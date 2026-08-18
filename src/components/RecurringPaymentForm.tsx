@@ -102,7 +102,7 @@ export default function RecurringPaymentForm({
                   매월 입금액 (원) <span className="text-destructive">*</span>
                 </Label>
                 {formattedAmountDisplay && (
-                  <span className="text-xs font-bold text-primary font-mono">
+                  <span className="text-xs font-bold text-zinc-900 dark:text-white font-mono">
                     {formattedAmountDisplay}원
                   </span>
                 )}
@@ -147,14 +147,14 @@ export default function RecurringPaymentForm({
               type="button"
               variant="outline"
               onClick={onClose}
-              className="h-12 flex-1 rounded-xl font-medium"
+              className="h-12 flex-1 rounded-xl font-medium border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800"
             >
               취소
             </Button>
             <Button
               type="submit"
               disabled={!isValid}
-              className="h-12 flex-1 rounded-xl font-semibold shadow-xs"
+              className="h-12 flex-1 rounded-xl font-semibold shadow-xs bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100"
             >
               {isEdit ? "수정 완료" : "등록하기"}
             </Button>

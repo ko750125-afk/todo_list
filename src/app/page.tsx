@@ -301,15 +301,15 @@ export default function Home() {
           </span>
         </div>
 
-        {/* 필터 탭 (최상단 배치) */}
-        <div className="mt-4 flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-muted/60 rounded-xl">
+        {/* 필터 탭 (흑백 투톤) */}
+        <div className="mt-4 flex items-center gap-1.5 p-1 bg-zinc-100 dark:bg-zinc-900 rounded-xl border border-zinc-200/80 dark:border-zinc-800">
           <button
             type="button"
             onClick={() => setFilter("all")}
             className={`flex-1 py-1.5 text-xs rounded-lg font-medium transition-all ${
               filter === "all"
-                ? "bg-background text-foreground shadow-2xs font-semibold"
-                : "text-muted-foreground hover:text-foreground"
+                ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 shadow-xs font-semibold"
+                : "text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
             }`}
           >
             전체 ({incompleteTodos.length})
@@ -319,8 +319,8 @@ export default function Home() {
             onClick={() => setFilter("payment")}
             className={`flex-1 py-1.5 text-xs rounded-lg font-medium transition-all ${
               filter === "payment"
-                ? "bg-background text-foreground shadow-2xs font-semibold"
-                : "text-muted-foreground hover:text-foreground"
+                ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 shadow-xs font-semibold"
+                : "text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
             }`}
           >
             입금만 ({incompleteTodos.filter((t) => t.type === "payment").length})
@@ -330,8 +330,8 @@ export default function Home() {
             onClick={() => setFilter("normal")}
             className={`flex-1 py-1.5 text-xs rounded-lg font-medium transition-all ${
               filter === "normal"
-                ? "bg-background text-foreground shadow-2xs font-semibold"
-                : "text-muted-foreground hover:text-foreground"
+                ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 shadow-xs font-semibold"
+                : "text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
             }`}
           >
             일반 할일 ({incompleteTodos.filter((t) => t.type !== "payment").length})
@@ -343,18 +343,18 @@ export default function Home() {
       <main className="flex-1 pb-6 pt-1">
         {todos === null && (
           <div className="py-16 text-center">
-            <div className="inline-block size-6 animate-spin rounded-full border-2 border-primary border-t-transparent mb-2" />
-            <p className="text-sm text-muted-foreground">데이터를 불러오는 중...</p>
+            <div className="inline-block size-6 animate-spin rounded-full border-2 border-zinc-900 dark:border-white border-t-transparent mb-2" />
+            <p className="text-sm text-zinc-500">데이터를 불러오는 중...</p>
           </div>
         )}
 
         {todos !== null && totalTodosCount === 0 && (
           <div className="py-16 text-center flex flex-col items-center justify-center">
-            <div className="size-12 rounded-full bg-slate-100 dark:bg-muted flex items-center justify-center text-muted-foreground mb-3">
+            <div className="size-12 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-500 mb-3">
               <CheckCircle2 className="size-6" />
             </div>
-            <p className="font-semibold text-foreground">등록된 할일이 없습니다</p>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="font-semibold text-zinc-900 dark:text-zinc-100">등록된 할일이 없습니다</p>
+            <p className="text-xs text-zinc-500 mt-1">
               하단 + 버튼을 눌러 새 할일을 추가해 보세요!
             </p>
           </div>
@@ -364,18 +364,18 @@ export default function Home() {
         {todos !== null && totalTodosCount > 0 && (
           <div className="flex flex-col gap-2.5">
             {filteredIncomplete.length === 0 && incompleteTodos.length > 0 && (
-              <p className="py-8 text-center text-xs text-muted-foreground">
+              <p className="py-8 text-center text-xs text-zinc-500">
                 선택한 필터 조건에 해당하는 할일이 없습니다.
               </p>
             )}
 
             {filteredIncomplete.length === 0 && incompleteTodos.length === 0 && (
-              <div className="py-10 text-center rounded-2xl border border-dashed border-emerald-300 dark:border-emerald-900 bg-emerald-50/50 dark:bg-emerald-950/20 p-6">
-                <CheckCircle2 className="size-8 text-emerald-500 mx-auto mb-2" />
-                <p className="font-bold text-sm text-emerald-700 dark:text-emerald-300">
+              <div className="py-10 text-center rounded-2xl border border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/60 p-6">
+                <CheckCircle2 className="size-8 text-zinc-900 dark:text-zinc-100 mx-auto mb-2" />
+                <p className="font-bold text-sm text-zinc-900 dark:text-zinc-100">
                   모든 할일을 완료했습니다!
                 </p>
-                <p className="text-xs text-emerald-600/80 dark:text-emerald-400/70 mt-0.5">
+                <p className="text-xs text-zinc-500 mt-0.5">
                   오늘 하루도 고생 많으셨습니다.
                 </p>
               </div>
@@ -410,10 +410,10 @@ export default function Home() {
             {/* 할일과 완료된 항목 사이 깔끔한 실선 구분선 */}
             <div className="relative mb-5">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-200 dark:border-border/80" />
+                <div className="w-full border-t border-zinc-200 dark:border-zinc-800" />
               </div>
               <div className="relative flex justify-center">
-                <span className="bg-background px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                <span className="bg-background px-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
                   완료된 항목 ({filteredCompleted.length})
                 </span>
               </div>
@@ -435,14 +435,14 @@ export default function Home() {
         )}
       </main>
 
-      {/* Floating Action Button (FAB) */}
+      {/* Floating Action Button (FAB) - 흑백 솔리드 버튼 */}
       <div className="fixed bottom-20 left-0 right-0 pointer-events-none z-30">
         <div className="max-w-lg mx-auto px-5 flex justify-end">
           <Button
             type="button"
             aria-label="할일 추가"
             onClick={() => setShowAddForm(true)}
-            className="pointer-events-auto h-14 w-14 rounded-full p-0 shadow-lg shadow-primary/30 bg-primary hover:bg-primary/90 text-primary-foreground hover:scale-105 active:scale-95 transition-all duration-200"
+            className="pointer-events-auto h-14 w-14 rounded-full p-0 shadow-lg shadow-zinc-900/20 bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100 hover:scale-105 active:scale-95 transition-all duration-200"
           >
             <Plus className="size-6 stroke-[2.5]" />
           </Button>

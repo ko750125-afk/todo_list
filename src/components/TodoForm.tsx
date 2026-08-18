@@ -149,8 +149,8 @@ export default function TodoForm({ todo, onSubmit, onClose }: TodoFormProps) {
                   onClick={() => setDueDate(getPresetDate(0))}
                   className={`flex-1 py-1 rounded-lg border text-[11px] font-medium transition-colors ${
                     dueDate === getPresetDate(0)
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : "bg-slate-100 dark:bg-muted text-slate-700 dark:text-slate-300 border-transparent hover:border-slate-300"
+                      ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 border-zinc-900 dark:border-white"
+                      : "bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border-transparent hover:border-zinc-300"
                   }`}
                 >
                   오늘
@@ -160,8 +160,8 @@ export default function TodoForm({ todo, onSubmit, onClose }: TodoFormProps) {
                   onClick={() => setDueDate(getPresetDate(1))}
                   className={`flex-1 py-1 rounded-lg border text-[11px] font-medium transition-colors ${
                     dueDate === getPresetDate(1)
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : "bg-slate-100 dark:bg-muted text-slate-700 dark:text-slate-300 border-transparent hover:border-slate-300"
+                      ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 border-zinc-900 dark:border-white"
+                      : "bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border-transparent hover:border-zinc-300"
                   }`}
                 >
                   내일
@@ -171,8 +171,8 @@ export default function TodoForm({ todo, onSubmit, onClose }: TodoFormProps) {
                   onClick={() => setDueDate(getWeekendPreset())}
                   className={`flex-1 py-1 rounded-lg border text-[11px] font-medium transition-colors ${
                     dueDate === getWeekendPreset()
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : "bg-slate-100 dark:bg-muted text-slate-700 dark:text-slate-300 border-transparent hover:border-slate-300"
+                      ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 border-zinc-900 dark:border-white"
+                      : "bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border-transparent hover:border-zinc-300"
                   }`}
                 >
                   이번 주말
@@ -181,8 +181,8 @@ export default function TodoForm({ todo, onSubmit, onClose }: TodoFormProps) {
             </div>
 
             {isPayment && (
-              <div className="rounded-2xl bg-slate-50 dark:bg-muted/30 p-4 border border-border/60 flex flex-col gap-3.5">
-                <div className="text-xs font-bold text-primary flex items-center gap-1">
+              <div className="rounded-2xl bg-zinc-50 dark:bg-zinc-900/60 p-4 border border-zinc-200 dark:border-zinc-800 flex flex-col gap-3.5">
+                <div className="text-xs font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-1">
                   💳 정기입금 연동 정보
                 </div>
 
@@ -206,7 +206,7 @@ export default function TodoForm({ todo, onSubmit, onClose }: TodoFormProps) {
                       입금액 (원)
                     </Label>
                     {formattedAmountDisplay && (
-                      <span className="text-xs font-bold text-primary font-mono">
+                      <span className="text-xs font-bold text-zinc-900 dark:text-white font-mono">
                         {formattedAmountDisplay}원
                       </span>
                     )}
@@ -259,11 +259,14 @@ export default function TodoForm({ todo, onSubmit, onClose }: TodoFormProps) {
               type="button"
               variant="outline"
               onClick={onClose}
-              className="h-12 flex-1 rounded-xl font-medium"
+              className="h-12 flex-1 rounded-xl font-medium border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800"
             >
               취소
             </Button>
-            <Button type="submit" className="h-12 flex-1 rounded-xl font-semibold shadow-xs">
+            <Button
+              type="submit"
+              className="h-12 flex-1 rounded-xl font-semibold shadow-xs bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100"
+            >
               {isEdit ? "수정 완료" : "등록하기"}
             </Button>
           </div>

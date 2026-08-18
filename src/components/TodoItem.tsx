@@ -61,12 +61,12 @@ export default function TodoItem({
       onDragEnd={onDragEnd}
       className={`group relative flex flex-col gap-3 rounded-2xl border p-4 transition-all duration-200 ${
         isDragging
-          ? "opacity-30 scale-[0.98] border-dashed border-emerald-500 ring-2 ring-emerald-400/40"
+          ? "opacity-30 scale-[0.98] border-dashed border-zinc-900 dark:border-white ring-2 ring-zinc-400/40"
           : isDragOver
-          ? "border-emerald-500 bg-emerald-100/50 ring-2 ring-emerald-500/50 shadow-md"
+          ? "border-zinc-900 dark:border-white bg-zinc-100 dark:bg-zinc-800 ring-2 ring-zinc-900/40 dark:ring-white/40 shadow-md"
           : todo.completed
-          ? "border-border/40 bg-muted/20 opacity-60"
-          : "border-emerald-200/90 dark:border-emerald-800/60 bg-gradient-to-br from-emerald-50/90 via-emerald-50/40 to-lime-50/50 dark:from-emerald-950/30 dark:via-card dark:to-lime-950/20 shadow-xs hover:border-emerald-400 hover:shadow-sm"
+          ? "border-zinc-200/60 dark:border-zinc-800/40 bg-zinc-50/50 dark:bg-zinc-900/20 opacity-50"
+          : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xs hover:border-zinc-900 dark:hover:border-zinc-400 hover:shadow-sm"
       }`}
     >
       <div className="flex items-start gap-2.5">
@@ -74,7 +74,7 @@ export default function TodoItem({
         {!todo.completed && draggable && (
           <div
             title="드래그하여 순서 변경"
-            className="mt-0.5 -ml-1 flex h-6 items-center justify-center text-emerald-300 hover:text-emerald-700 dark:text-emerald-700 dark:hover:text-emerald-300 cursor-grab active:cursor-grabbing shrink-0 transition-colors"
+            className="mt-0.5 -ml-1 flex h-6 items-center justify-center text-zinc-300 hover:text-zinc-900 dark:text-zinc-600 dark:hover:text-zinc-100 cursor-grab active:cursor-grabbing shrink-0 transition-colors"
           >
             <GripVertical className="size-4" />
           </div>
@@ -87,8 +87,8 @@ export default function TodoItem({
           onClick={() => onToggle(todo)}
           className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition-all duration-200 ${
             todo.completed
-              ? "border-emerald-600 bg-emerald-600 text-white scale-95"
-              : "border-emerald-400 hover:border-emerald-600 bg-background"
+              ? "border-zinc-900 bg-zinc-900 text-white dark:border-white dark:bg-white dark:text-zinc-900 scale-95"
+              : "border-zinc-300 hover:border-zinc-900 dark:border-zinc-600 dark:hover:border-white bg-background"
           }`}
         >
           {todo.completed && <Check className="size-3.5 stroke-[3]" />}
@@ -98,12 +98,12 @@ export default function TodoItem({
         <div className="min-w-0 flex-1 text-left">
           <div className="flex items-center gap-2 flex-wrap">
             {isPayment ? (
-              /* 입금일 뱃지: 싱그러운 연두색 뱃지 */
+              /* 입금일 뱃지: 흑백 투톤 뱃지 */
               <Badge
                 variant="outline"
-                className="shrink-0 bg-emerald-500/15 text-emerald-800 dark:text-emerald-200 font-bold text-xs px-2.5 py-0.5 rounded-lg border-emerald-300 dark:border-emerald-700 flex items-center gap-1"
+                className="shrink-0 bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 font-bold text-xs px-2.5 py-0.5 rounded-lg border-zinc-300 dark:border-zinc-700 flex items-center gap-1"
               >
-                <Calendar className="size-3.5 text-emerald-700 dark:text-emerald-400" />
+                <Calendar className="size-3.5 text-zinc-700 dark:text-zinc-300" />
                 {todo.month && todo.paymentDay
                   ? `${todo.month}월 ${todo.paymentDay}일 입금`
                   : todo.paymentDay
@@ -117,9 +117,9 @@ export default function TodoItem({
                 /* 일반 할일 날짜 / 마감일 뱃지 */
                 <Badge
                   variant="outline"
-                  className="shrink-0 bg-emerald-500/10 text-emerald-800 dark:text-emerald-200 font-semibold text-xs px-2 py-0.5 rounded-lg border-emerald-300 dark:border-emerald-700 flex items-center gap-1"
+                  className="shrink-0 bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 font-semibold text-xs px-2 py-0.5 rounded-lg border-zinc-300 dark:border-zinc-700 flex items-center gap-1"
                 >
-                  <Calendar className="size-3 text-emerald-600 dark:text-emerald-400" />
+                  <Calendar className="size-3 text-zinc-600 dark:text-zinc-400" />
                   {(() => {
                     const todayStr = new Date().toISOString().split("T")[0];
                     const [y, m, d] = todo.dueDate.split("-").map(Number);
@@ -132,8 +132,8 @@ export default function TodoItem({
             <span
               className={`text-base font-semibold break-keep leading-snug ${
                 todo.completed
-                  ? "text-muted-foreground line-through decoration-slate-400 font-normal"
-                  : "text-emerald-950 dark:text-emerald-50"
+                  ? "text-zinc-400 dark:text-zinc-500 line-through decoration-zinc-400 font-normal"
+                  : "text-zinc-900 dark:text-zinc-50"
               }`}
             >
               {todo.title}
@@ -143,12 +143,12 @@ export default function TodoItem({
           {/* 입금 세부정보 영역 */}
           {isPayment && (
             <div className="mt-2.5 flex flex-col gap-2">
-              <div className="flex items-center justify-between rounded-xl bg-white/90 dark:bg-card/90 p-2.5 border border-emerald-200/70 dark:border-emerald-900/50 shadow-2xs">
+              <div className="flex items-center justify-between rounded-xl bg-zinc-50 dark:bg-zinc-950/80 p-2.5 border border-zinc-200/80 dark:border-zinc-800 shadow-2xs">
                 <div className="flex items-baseline gap-1.5">
-                  <span className="text-xs text-muted-foreground font-semibold">송금액</span>
+                  <span className="text-xs text-zinc-500 font-semibold">송금액</span>
                   <span
                     className={`text-lg font-extrabold ${
-                      todo.completed ? "text-muted-foreground" : "text-emerald-700 dark:text-emerald-400 font-mono"
+                      todo.completed ? "text-zinc-400" : "text-zinc-900 dark:text-white font-mono"
                     }`}
                   >
                     {formatCurrency(todo.amount ?? 0)}
@@ -160,24 +160,24 @@ export default function TodoItem({
               {todo.bank && todo.accountNumber && (
                 <div
                   onClick={handleCopy}
-                  className="flex items-center justify-between rounded-xl bg-white/90 dark:bg-card/90 border border-emerald-200/70 dark:border-emerald-900/50 px-3 py-2 text-xs text-slate-800 dark:text-slate-200 hover:bg-emerald-50/80 active:scale-[0.99] transition-all cursor-pointer group/chip"
+                  className="flex items-center justify-between rounded-xl bg-zinc-50 dark:bg-zinc-950/80 border border-zinc-200 dark:border-zinc-800 px-3 py-2 text-xs text-zinc-800 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-[0.99] transition-all cursor-pointer group/chip"
                 >
                   <div className="flex items-center gap-1.5 truncate">
-                    <span className="font-semibold text-foreground">{todo.bank}</span>
-                    <span className="font-mono text-muted-foreground">{todo.accountNumber}</span>
+                    <span className="font-semibold text-zinc-900 dark:text-zinc-100">{todo.bank}</span>
+                    <span className="font-mono text-zinc-500 dark:text-zinc-400">{todo.accountNumber}</span>
                     {todo.recipient && (
-                      <span className="text-muted-foreground">({todo.recipient})</span>
+                      <span className="text-zinc-500">({todo.recipient})</span>
                     )}
                   </div>
-                  <div className="flex items-center gap-1 shrink-0 ml-2 font-semibold text-emerald-700 dark:text-emerald-400 text-[11px]">
+                  <div className="flex items-center gap-1 shrink-0 ml-2 font-semibold text-zinc-900 dark:text-zinc-100 text-[11px]">
                     {copied ? (
                       <>
-                        <Check className="size-3.5 text-emerald-600" />
-                        <span className="text-emerald-600 font-semibold">복사됨</span>
+                        <Check className="size-3.5 text-zinc-900 dark:text-white" />
+                        <span className="text-zinc-900 dark:text-white font-semibold">복사됨</span>
                       </>
                     ) : (
                       <>
-                        <Copy className="size-3.5 text-muted-foreground group-hover/chip:text-emerald-700 transition-colors" />
+                        <Copy className="size-3.5 text-zinc-400 group-hover/chip:text-zinc-900 dark:group-hover/chip:text-white transition-colors" />
                         <span>복사</span>
                       </>
                     )}
@@ -189,14 +189,14 @@ export default function TodoItem({
         </div>
 
         {/* 액션 버튼 (삭제만 유지) */}
-        <div className="flex items-center shrink-0 opacity-80 group-hover:opacity-100 transition-opacity">
+        <div className="flex items-center shrink-0 opacity-70 group-hover:opacity-100 transition-opacity">
           <Button
             type="button"
             variant="ghost"
             size="icon"
             aria-label="삭제"
             onClick={() => onDelete(todo)}
-            className="h-8 w-8 text-muted-foreground hover:text-destructive rounded-lg"
+            className="h-8 w-8 text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg"
           >
             <Trash2 className="size-3.5" />
           </Button>

@@ -25,8 +25,8 @@ export default function BottomNavigation() {
               aria-current={active ? "page" : undefined}
               className={`flex-1 flex flex-col items-center justify-center py-2 px-3 rounded-2xl transition-all duration-200 ${
                 active
-                  ? "bg-primary/10 text-primary font-semibold shadow-xs"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/40 font-medium"
+                  ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 font-semibold shadow-xs"
+                  : "text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800/60 font-medium"
               }`}
             >
               <Icon className={`size-5 transition-transform duration-200 ${active ? "scale-110" : ""}`} />
