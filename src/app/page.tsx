@@ -289,7 +289,6 @@ export default function Home() {
   };
 
   return (
-  return (
     <div className="flex flex-1 flex-col px-4 sm:px-6">
       {/* 상단 헤더 & 필터 탭 */}
       <header className="pt-7 pb-3">
