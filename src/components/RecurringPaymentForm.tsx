@@ -2,12 +2,21 @@
 
 import { useState } from "react";
 import type { RecurringPayment } from "@/types/recurringPayment";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 export interface RecurringPaymentInput {
   recipient: string;
   amount: number;
-  bank: string;
-  accountNumber: string;
+  bank?: string;
+  accountNumber?: string;
   paymentDay: number;
 }
 
@@ -28,12 +37,15 @@ export default function RecurringPaymentForm({
 
   const [recipient, setRecipient] = useState(payment?.recipient ?? "");
   const [amount, setAmount] = useState(payment?.amount?.toString() ?? "");
-  const [bank, setBank] = useState(payment?.bank ?? "");
-  const [accountNumber, setAccountNumber] = useState(payment?.accountNumber ?? "");
   const [paymentDay, setPaymentDay] = useState(payment?.paymentDay?.toString() ?? "");
+  const [isDayFocused, setIsDayFocused] = useState(false);
 
-  const isValid =
-    recipient.trim() && amount && bank.trim() && accountNumber.trim() && paymentDay;
+  const isValid = recipient.trim() && amount && paymentDay;
+
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value.replace(/[^0-9]/g, "");
+    setAmount(raw);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,90 +56,124 @@ export default function RecurringPaymentForm({
 
     onSubmit({
       recipient: recipient.trim(),
-      amount: Number(amount) || 0,
-      bank: bank.trim(),
-      accountNumber: accountNumber.trim(),
+      amount: Number(amount.replace(/,/g, "")) || 0,
+      bank: payment?.bank ?? "",
+      accountNumber: payment?.accountNumber ?? "",
       paymentDay: day,
     });
   };
 
+  const formattedAmountDisplay = amount
+    ? Number(amount.replace(/,/g, "")).toLocaleString("ko-KR")
+    : "";
+
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/30 sm:items-center">
-      <form
-        onSubmit={handleSubmit}
-        className="w-full max-w-xl rounded-t-2xl bg-white p-6 sm:rounded-2xl"
-      >
-        <h2 className="text-lg font-semibold text-foreground">
-          {isEdit ? "정기입금 수정" : "정기입금 추가"}
-        </h2>
+    <Dialog open onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="sm:max-w-md rounded-3xl p-6">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold">
+              {isEdit ? "정기입금 정보 수정" : "새 정기입금 등록"}
+            </DialogTitle>
+          </DialogHeader>
 
-        <div className="mt-4 flex flex-col gap-4">
-          <input
-            autoFocus
-            type="text"
-            value={recipient}
-            onChange={(e) => setRecipient(e.target.value)}
-            placeholder="입금처"
-            className="w-full rounded-xl border border-border px-4 py-3 text-base text-foreground outline-none focus:border-accent"
-          />
-          <input
-            type="number"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            placeholder="입금액"
-            className="w-full rounded-xl border border-border px-4 py-3 text-base text-foreground outline-none focus:border-accent"
-          />
-          <input
-            type="text"
-            value={bank}
-            onChange={(e) => setBank(e.target.value)}
-            placeholder="은행"
-            className="w-full rounded-xl border border-border px-4 py-3 text-base text-foreground outline-none focus:border-accent"
-          />
-          <input
-            type="text"
-            value={accountNumber}
-            onChange={(e) => setAccountNumber(e.target.value)}
-            placeholder="계좌번호"
-            className="w-full rounded-xl border border-border px-4 py-3 text-base text-foreground outline-none focus:border-accent"
-          />
-          <input
-            type="number"
-            min={1}
-            max={31}
-            value={paymentDay}
-            onChange={(e) => setPaymentDay(e.target.value)}
-            placeholder="매월 입금일 (1~31)"
-            className="w-full rounded-xl border border-border px-4 py-3 text-base text-foreground outline-none focus:border-accent"
-          />
-        </div>
+          <div className="flex flex-col gap-4">
+            {/* 입금처 입력 */}
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="recurring-recipient" className="text-xs font-semibold text-muted-foreground">
+                입금처 / 수취인 <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="recurring-recipient"
+                autoFocus
+                type="text"
+                value={recipient}
+                onChange={(e) => setRecipient(e.target.value)}
+                placeholder="예: 월세, 부모님 용돈, 적금"
+                className="h-12 rounded-xl text-base focus:placeholder-transparent transition-all"
+              />
+            </div>
 
-        <div className="mt-6 flex gap-3">
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex-1 rounded-xl border border-border py-3 text-base font-medium text-foreground"
-          >
-            취소
-          </button>
-          <button
-            type="submit"
-            className="flex-1 rounded-xl bg-accent py-3 text-base font-medium text-white"
-          >
-            저장
-          </button>
-        </div>
+            {/* 입금액 입력 */}
+            {/* 입금액 입력 */}
+            <div className="flex flex-col gap-1.5">
+              <div className="flex justify-between items-center">
+                <Label htmlFor="recurring-amount" className="text-xs font-semibold text-muted-foreground">
+                  매월 입금액 (원) <span className="text-destructive">*</span>
+                </Label>
+                {formattedAmountDisplay && (
+                  <span className="text-xs font-bold text-primary font-mono">
+                    {formattedAmountDisplay}원
+                  </span>
+                )}
+              </div>
+              <Input
+                id="recurring-amount"
+                type="text"
+                inputMode="numeric"
+                value={amount ? Number(amount).toLocaleString("ko-KR") : ""}
+                onChange={handleAmountChange}
+                placeholder="예: 500,000"
+                className="h-12 rounded-xl font-mono text-base font-semibold focus:placeholder-transparent transition-all"
+              />
+            </div>
 
-        {isEdit && onDelete && (
-          <button
-            type="button"
-            onClick={onDelete}
-            className="mt-4 w-full py-2 text-sm text-muted"
-          >
-            정기입금 삭제
-          </button>
-        )}
-      </form>
-    </div>
+            {/* 매월 입금일 입력 */}
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="recurring-payment-day" className="text-xs font-semibold text-muted-foreground">
+                매월 입금일 (1~31일) <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="recurring-payment-day"
+                type="text"
+                inputMode="numeric"
+                value={paymentDay}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/[^0-9]/g, "");
+                  if (val === "" || (Number(val) >= 1 && Number(val) <= 31)) {
+                    setPaymentDay(val);
+                  }
+                }}
+                placeholder={isDayFocused ? "" : "예: 25"}
+                onFocus={() => setIsDayFocused(true)}
+                onBlur={() => setIsDayFocused(false)}
+                className="h-12 rounded-xl font-mono text-base focus:placeholder-transparent transition-all"
+              />
+            </div>
+          </div>
+
+          <div className="flex gap-2.5 pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              className="h-12 flex-1 rounded-xl font-medium"
+            >
+              취소
+            </Button>
+            <Button
+              type="submit"
+              disabled={!isValid}
+              className="h-12 flex-1 rounded-xl font-semibold shadow-xs"
+            >
+              {isEdit ? "수정 완료" : "등록하기"}
+            </Button>
+          </div>
+
+          {isEdit && onDelete && (
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={onDelete}
+              className="h-10 w-full text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-xl text-xs font-medium"
+            >
+              정기입금 항목 삭제하기
+            </Button>
+          )}
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
+
+

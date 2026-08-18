@@ -11,14 +11,17 @@ import {
   Timestamp,
   updateDoc,
 } from "firebase/firestore";
+import { Plus, CalendarClock, CreditCard, Sparkles } from "lucide-react";
+import { toast } from "sonner";
 import { db, RECURRING_PAYMENTS_COLLECTION } from "@/lib/firebase";
 import type { RecurringPayment } from "@/types/recurringPayment";
+import { formatCurrency } from "@/utils/format";
 import RecurringPaymentList from "@/components/RecurringPaymentList";
 import RecurringPaymentForm, {
   RecurringPaymentInput,
 } from "@/components/RecurringPaymentForm";
 import ConfirmDialog from "@/components/ConfirmDialog";
-import Toast from "@/components/Toast";
+import { Button } from "@/components/ui/button";
 
 export default function RecurringPage() {
   const [payments, setPayments] = useState<RecurringPayment[] | null>(null);
@@ -29,7 +32,7 @@ export default function RecurringPage() {
   const [deletingPayment, setDeletingPayment] = useState<RecurringPayment | null>(
     null
   );
-  const [toast, setToast] = useState<string | null>(null);
+  const [showGuide, setShowGuide] = useState(true);
 
   useEffect(() => {
     const q = query(
@@ -49,10 +52,10 @@ export default function RecurringPage() {
     [payments]
   );
 
-  const showToast = (message: string) => {
-    setToast(message);
-    setTimeout(() => setToast(null), 2000);
-  };
+  // 총 고정 지출액 계산
+  const totalMonthlyAmount = useMemo(() => {
+    return activePayments.reduce((sum, p) => sum + (p.amount || 0), 0);
+  }, [activePayments]);
 
   const handleAdd = async (data: RecurringPaymentInput) => {
     try {
@@ -63,9 +66,10 @@ export default function RecurringPage() {
         updatedAt: Timestamp.now(),
       });
       setShowAddForm(false);
+      toast.success("정기입금 항목이 추가되었습니다.");
     } catch (err) {
       console.error(err);
-      showToast("저장하지 못했습니다.\n다시 시도해주세요.");
+      toast.error("저장하지 못했습니다. 다시 시도해주세요.");
     }
   };
 
@@ -77,9 +81,10 @@ export default function RecurringPage() {
         updatedAt: Timestamp.now(),
       });
       setEditingPayment(null);
+      toast.success("수정되었습니다.");
     } catch (err) {
       console.error(err);
-      showToast("저장하지 못했습니다.\n다시 시도해주세요.");
+      toast.error("저장하지 못했습니다. 다시 시도해주세요.");
     }
   };
 
@@ -91,44 +96,100 @@ export default function RecurringPage() {
         updatedAt: Timestamp.now(),
       });
       setDeletingPayment(null);
+      toast.success("정기입금 항목이 삭제되었습니다.");
     } catch (err) {
       console.error(err);
-      showToast("저장하지 못했습니다.\n다시 시도해주세요.");
+      toast.error("저장하지 못했습니다. 다시 시도해주세요.");
     }
   };
 
   return (
-    <div className="flex flex-1 flex-col px-5">
-      <header className="pt-8 pb-4">
-        <h1 className="text-2xl font-semibold text-foreground">정기입금</h1>
+    <div className="flex flex-1 flex-col px-4 sm:px-6">
+      {/* 헤더 및 요약 카드 */}
+      <header className="pt-7 pb-4">
+        <h1 className="text-2xl font-bold text-foreground">
+          매월 정기입금 관리
+        </h1>
+
+        {/* 요약 카드 */}
+        <div className="mt-4 rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 p-5 text-white shadow-md shadow-slate-900/10">
+          <div className="flex items-center justify-between text-slate-300">
+            <span className="text-xs font-medium flex items-center gap-1">
+              <CreditCard className="size-3.5 text-blue-400" /> 월 고정 입금 합계
+            </span>
+            <span className="text-xs bg-white/10 px-2.5 py-0.5 rounded-full font-medium">
+              총 {activePayments.length}건
+            </span>
+          </div>
+
+          <div className="mt-2 text-3xl font-extrabold tracking-tight">
+            {formatCurrency(totalMonthlyAmount)}
+          </div>
+
+          {showGuide && (
+            <div
+              onClick={() => setShowGuide(false)}
+              className="mt-3 flex items-center justify-between rounded-xl bg-white/10 px-3 py-2 text-[11px] text-slate-300/90 cursor-pointer hover:bg-white/15 transition-all group"
+            >
+              <span>💡 매월 지정일 7일 전에 할일 목록으로 자동 등록됩니다.</span>
+              <span className="text-[10px] text-slate-400 group-hover:text-white ml-2 shrink-0">✕</span>
+            </div>
+          )}
+        </div>
       </header>
 
-      <main className="flex-1">
+      {/* 목록 영역 */}
+      <main className="flex-1 pb-6">
         {payments === null && (
-          <p className="py-10 text-center text-sm text-muted">불러오는 중...</p>
+          <div className="py-16 text-center">
+            <div className="inline-block size-6 animate-spin rounded-full border-2 border-primary border-t-transparent mb-2" />
+            <p className="text-sm text-muted-foreground">데이터를 불러오는 중...</p>
+          </div>
         )}
 
         {payments !== null && activePayments.length === 0 && (
-          <p className="whitespace-pre-line py-10 text-center text-sm text-muted">
-            {"등록된 정기입금이 없습니다.\n매달 직접 입금해야 하는 항목을\n등록해 보세요."}
-          </p>
+          <div className="py-16 text-center flex flex-col items-center justify-center">
+            <div className="size-12 rounded-full bg-slate-100 dark:bg-muted flex items-center justify-center text-muted-foreground mb-3">
+              <CalendarClock className="size-6" />
+            </div>
+            <p className="font-semibold text-foreground">등록된 정기입금이 없습니다</p>
+            <p className="text-xs text-muted-foreground mt-1 whitespace-pre-line">
+              {"매달 직접 계좌이체해야 하는 항목을\n하단 + 버튼을 눌러 등록해 보세요."}
+            </p>
+          </div>
         )}
 
         {payments !== null && activePayments.length > 0 && (
-          <RecurringPaymentList
-            payments={activePayments}
-            onSelect={setEditingPayment}
-          />
+          <div className="mt-2">
+            <div className="flex items-center justify-between mb-3 px-1">
+              <h2 className="text-xs font-bold text-muted-foreground tracking-wide uppercase">
+                등록된 정기입금 목록
+              </h2>
+              <span className="text-xs text-muted-foreground">
+                입금일 빠른 순
+              </span>
+            </div>
+            <RecurringPaymentList
+              payments={activePayments}
+              onSelect={setEditingPayment}
+            />
+          </div>
         )}
       </main>
 
-      <button
-        type="button"
-        onClick={() => setShowAddForm(true)}
-        className="mb-8 w-full rounded-xl bg-accent py-4 text-base font-medium text-white"
-      >
-        + 정기입금 추가
-      </button>
+      {/* Floating Action Button (FAB) */}
+      <div className="fixed bottom-20 left-0 right-0 pointer-events-none z-30">
+        <div className="max-w-lg mx-auto px-5 flex justify-end">
+          <Button
+            type="button"
+            aria-label="정기입금 추가"
+            onClick={() => setShowAddForm(true)}
+            className="pointer-events-auto h-14 w-14 rounded-full p-0 shadow-lg shadow-primary/30 bg-primary hover:bg-primary/90 text-primary-foreground hover:scale-105 active:scale-95 transition-all duration-200"
+          >
+            <Plus className="size-6 stroke-[2.5]" />
+          </Button>
+        </div>
+      </div>
 
       {showAddForm && (
         <RecurringPaymentForm
@@ -156,8 +217,7 @@ export default function RecurringPage() {
           onCancel={() => setDeletingPayment(null)}
         />
       )}
-
-      <Toast message={toast} />
     </div>
   );
 }
+

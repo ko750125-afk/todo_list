@@ -12,22 +12,33 @@ import {
   query,
   Timestamp,
   updateDoc,
+  writeBatch,
 } from "firebase/firestore";
-import { db, TODOS_COLLECTION } from "@/lib/firebase";
+import { Plus, CheckCircle2, ListFilter, CreditCard, Sparkles } from "lucide-react";
+import { toast } from "sonner";
+import { db, TODOS_COLLECTION, RECURRING_PAYMENTS_COLLECTION } from "@/lib/firebase";
 import type { Todo } from "@/types/todo";
+import type { RecurringPayment } from "@/types/recurringPayment";
 import { generateDueRecurringTodos } from "@/utils/recurringTodo";
 import { formatCurrency } from "@/utils/format";
 import TodoItem from "@/components/TodoItem";
 import TodoForm from "@/components/TodoForm";
 import ConfirmDialog from "@/components/ConfirmDialog";
-import Toast from "@/components/Toast";
+import { Button } from "@/components/ui/button";
+
+type FilterType = "all" | "payment" | "normal";
 
 export default function Home() {
-  const [todos, setTodos] = useState<Todo[] | null>(null);
+  const [rawTodos, setRawTodos] = useState<Todo[] | null>(null);
+  const [recurringMap, setRecurringMap] = useState<Map<string, RecurringPayment>>(new Map());
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
   const [deletingTodo, setDeletingTodo] = useState<Todo | null>(null);
-  const [toast, setToast] = useState<string | null>(null);
+  const [filter, setFilter] = useState<FilterType>("all");
+
+  // 드래그 앤 드롭 상태
+  const [draggedId, setDraggedId] = useState<string | null>(null);
+  const [dragOverId, setDragOverId] = useState<string | null>(null);
 
   useEffect(() => {
     generateDueRecurringTodos().catch((err) => {
@@ -35,25 +46,50 @@ export default function Home() {
     });
   }, []);
 
+  // 정기입금 원본 데이터 실시간 구독
+  useEffect(() => {
+    const q = query(collection(db, RECURRING_PAYMENTS_COLLECTION));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const map = new Map<string, RecurringPayment>();
+      snapshot.docs.forEach((d) => {
+        map.set(d.id, { id: d.id, ...d.data() } as RecurringPayment);
+      });
+      setRecurringMap(map);
+    });
+    return unsubscribe;
+  }, []);
+
+  // 할일 목록 실시간 구독
   useEffect(() => {
     const q = query(collection(db, TODOS_COLLECTION), orderBy("createdAt", "desc"));
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      setTodos(
+      setRawTodos(
         snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as Todo))
       );
     });
     return unsubscribe;
   }, []);
 
-  const showToast = (message: string) => {
-    setToast(message);
-    setTimeout(() => setToast(null), 2000);
-  };
+  // paymentDay가 누락된 경우 원본 recurringPayment의 paymentDay로 실시간 보정
+  const todos = useMemo(() => {
+    if (rawTodos === null) return null;
+    return rawTodos.map((t) => {
+      if (t.type === "payment" && !t.paymentDay && t.paymentId) {
+        const origin = recurringMap.get(t.paymentId);
+        if (origin?.paymentDay) {
+          return { ...t, paymentDay: origin.paymentDay };
+        }
+      }
+      return t;
+    });
+  }, [rawTodos, recurringMap]);
 
   const now = new Date();
   const currentYear = now.getFullYear();
   const currentMonth = now.getMonth() + 1;
 
+  // 전체 통계 계산
+  const totalTodosCount = todos?.length ?? 0;
   const incompleteTodos = useMemo(
     () => (todos ?? []).filter((t) => !t.completed),
     [todos]
@@ -63,17 +99,116 @@ export default function Home() {
     [todos]
   );
 
-  const remainingPaymentTotal = useMemo(() => {
-    return (todos ?? [])
-      .filter(
-        (t) =>
-          t.type === "payment" &&
-          !t.completed &&
-          t.year === currentYear &&
-          t.month === currentMonth
-      )
+  // 이번 달 남은 입금 및 총 입금 계산
+  const { remainingPaymentTotal, monthlyTotalPayment, completedPaymentTotal } = useMemo(() => {
+    const paymentsThisMonth = (todos ?? []).filter(
+      (t) => t.type === "payment" && t.year === currentYear && t.month === currentMonth
+    );
+    const total = paymentsThisMonth.reduce((sum, t) => sum + (t.amount ?? 0), 0);
+    const remaining = paymentsThisMonth
+      .filter((t) => !t.completed)
       .reduce((sum, t) => sum + (t.amount ?? 0), 0);
+    const completed = total - remaining;
+    return {
+      monthlyTotalPayment: total,
+      remainingPaymentTotal: remaining,
+      completedPaymentTotal: completed,
+    };
   }, [todos, currentYear, currentMonth]);
+
+  // 필터링 적용
+  const filteredIncomplete = useMemo(() => {
+    return incompleteTodos.filter((t) => {
+      if (filter === "payment") return t.type === "payment";
+      if (filter === "normal") return t.type !== "payment";
+      return true;
+    });
+  }, [incompleteTodos, filter]);
+
+  // 우선순위 정렬 (order 오름차순, 없으면 createdAt 최신순)
+  const sortedIncomplete = useMemo(() => {
+    return [...filteredIncomplete].sort((a, b) => {
+      if (a.order !== undefined && b.order !== undefined) {
+        return a.order - b.order;
+      }
+      if (a.order !== undefined) return -1;
+      if (b.order !== undefined) return 1;
+      return (b.createdAt?.seconds ?? 0) - (a.createdAt?.seconds ?? 0);
+    });
+  }, [filteredIncomplete]);
+
+  const filteredCompleted = useMemo(() => {
+    return completedTodos.filter((t) => {
+      if (filter === "payment") return t.type === "payment";
+      if (filter === "normal") return t.type !== "payment";
+      return true;
+    });
+  }, [completedTodos, filter]);
+
+  // 드래그 앤 드롭 핸들러
+  const handleDragStart = (id: string) => {
+    setDraggedId(id);
+  };
+
+  const handleDragOver = (e: React.DragEvent, id: string) => {
+    e.preventDefault();
+    if (dragOverId !== id) {
+      setDragOverId(id);
+    }
+  };
+
+  const handleDrop = async (e: React.DragEvent, targetId: string) => {
+    e.preventDefault();
+    if (!draggedId || draggedId === targetId) {
+      setDraggedId(null);
+      setDragOverId(null);
+      return;
+    }
+
+    const items = [...sortedIncomplete];
+    const fromIndex = items.findIndex((i) => i.id === draggedId);
+    const toIndex = items.findIndex((i) => i.id === targetId);
+
+    if (fromIndex < 0 || toIndex < 0) {
+      setDraggedId(null);
+      setDragOverId(null);
+      return;
+    }
+
+    // 순서 재배치
+    const [movedItem] = items.splice(fromIndex, 1);
+    items.splice(toIndex, 0, movedItem);
+
+    // 낙관적 UI 업데이트
+    setRawTodos((prev) => {
+      if (!prev) return prev;
+      const otherItems = prev.filter((p) => p.completed || !items.some((i) => i.id === p.id));
+      const updatedMoved = items.map((item, idx) => ({ ...item, order: idx }));
+      return [...updatedMoved, ...otherItems];
+    });
+
+    setDraggedId(null);
+    setDragOverId(null);
+
+    // Firestore batch 업데이트
+    try {
+      const batch = writeBatch(db);
+      items.forEach((item, index) => {
+        const ref = doc(db, TODOS_COLLECTION, item.id);
+        batch.update(ref, { order: index });
+      });
+      await batch.commit();
+      toast.success("우선순위가 저장되었습니다.");
+    } catch (err) {
+      console.error("우선순위 저장 실패", err);
+      toast.error("우선순위 저장에 실패했습니다.");
+    }
+  };
+
+  const handleDragEnd = () => {
+    setDraggedId(null);
+    setDragOverId(null);
+  };
 
   const handleToggle = async (todo: Todo) => {
     try {
@@ -81,24 +216,34 @@ export default function Home() {
         completed: !todo.completed,
         completedAt: !todo.completed ? Timestamp.now() : deleteField(),
       });
+      if (!todo.completed) {
+        toast.success("할일을 완료했습니다! 🎉");
+      }
     } catch (err) {
       console.error(err);
-      showToast("저장하지 못했습니다.\n다시 시도해주세요.");
+      toast.error("저장하지 못했습니다. 다시 시도해주세요.");
     }
   };
 
   const handleAdd = async (data: { title: string }) => {
     try {
+      // 새로운 할일은 가장 높은 우선순위 (가장 작은 order)
+      const minOrder = (rawTodos ?? []).reduce(
+        (min, t) => (t.order !== undefined && t.order < min ? t.order : min),
+        0
+      );
       await addDoc(collection(db, TODOS_COLLECTION), {
         title: data.title,
         completed: false,
         type: "normal",
+        order: minOrder - 1,
         createdAt: Timestamp.now(),
       });
       setShowAddForm(false);
+      toast.success("새 할일이 등록되었습니다.");
     } catch (err) {
       console.error(err);
-      showToast("저장하지 못했습니다.\n다시 시도해주세요.");
+      toast.error("저장하지 못했습니다. 다시 시도해주세요.");
     }
   };
 
@@ -108,14 +253,16 @@ export default function Home() {
     amount?: number;
     bank?: string;
     accountNumber?: string;
+    paymentDay?: number;
   }) => {
     if (!editingTodo) return;
     try {
       await updateDoc(doc(db, TODOS_COLLECTION, editingTodo.id), { ...data });
       setEditingTodo(null);
+      toast.success("수정되었습니다.");
     } catch (err) {
       console.error(err);
-      showToast("저장하지 못했습니다.\n다시 시도해주세요.");
+      toast.error("저장하지 못했습니다. 다시 시도해주세요.");
     }
   };
 
@@ -124,53 +271,167 @@ export default function Home() {
     try {
       await deleteDoc(doc(db, TODOS_COLLECTION, deletingTodo.id));
       setDeletingTodo(null);
+      toast.success("할일이 삭제되었습니다.");
     } catch (err) {
       console.error(err);
-      showToast("저장하지 못했습니다.\n다시 시도해주세요.");
+      toast.error("저장하지 못했습니다. 다시 시도해주세요.");
     }
   };
 
   const handleCopyAccount = async (accountNumber: string) => {
     try {
       await navigator.clipboard.writeText(accountNumber);
-      showToast("계좌번호를 복사했습니다.");
+      toast.success("계좌번호가 클립보드에 복사되었습니다.");
     } catch (err) {
       console.error(err);
+      toast.error("계좌번호 복사에 실패했습니다.");
     }
   };
 
   return (
-    <div className="flex flex-1 flex-col px-5">
-      <header className="pt-8 pb-4">
-        <h1 className="text-2xl font-semibold text-foreground">
-          {currentMonth}월 할일
-        </h1>
-        <div className="mt-2 flex flex-col gap-1 text-sm text-muted">
-          <span>미완료 {incompleteTodos.length}개</span>
-          <span>
-            이번 달 남은 입금{" "}
-            <span className="font-medium text-accent">
-              {formatCurrency(remainingPaymentTotal)}
-            </span>
+    <div className="flex flex-1 flex-col px-4 sm:px-6">
+      {/* 상단 헤더 & 대시보드 요약 카드 */}
+      <header className="pt-7 pb-4">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-foreground">
+            {currentMonth}월 할일 & 입금
+          </h1>
+          <span className="text-xs px-2.5 py-1 rounded-full bg-slate-100 dark:bg-muted text-muted-foreground font-medium">
+            {now.toLocaleDateString("ko-KR", { month: "short", day: "numeric", weekday: "short" })}
           </span>
+        </div>
+
+        {/* 대시보드 카드 */}
+        <div className="mt-4 rounded-3xl bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 p-5 text-white shadow-md shadow-blue-500/20">
+          <div className="flex items-center justify-between text-blue-100">
+            <span className="text-xs font-medium flex items-center gap-1">
+              <CreditCard className="size-3.5" /> 이번 달 남은 입금액
+            </span>
+            <span className="text-xs bg-white/15 px-2 py-0.5 rounded-full backdrop-blur-xs font-medium">
+              미완료 {incompleteTodos.length}건
+            </span>
+          </div>
+
+          <div className="mt-2 text-3xl font-extrabold tracking-tight">
+            {formatCurrency(remainingPaymentTotal)}
+          </div>
+
+          {/* 진행 바 */}
+          {monthlyTotalPayment > 0 && (
+            <div className="mt-3.5">
+              <div className="flex justify-between text-[11px] text-blue-200/90 mb-1 font-medium">
+                <span>완료 {formatCurrency(completedPaymentTotal)}</span>
+                <span>총 {formatCurrency(monthlyTotalPayment)}</span>
+              </div>
+              <div className="h-1.5 w-full bg-white/20 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-white rounded-full transition-all duration-500"
+                  style={{
+                    width: `${Math.min(
+                      100,
+                      Math.round((completedPaymentTotal / monthlyTotalPayment) * 100)
+                    )}%`,
+                  }}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 필터 탭 */}
+        <div className="mt-4 flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-muted/60 rounded-xl">
+          <button
+            type="button"
+            onClick={() => setFilter("all")}
+            className={`flex-1 py-1.5 text-xs rounded-lg font-medium transition-all ${
+              filter === "all"
+                ? "bg-background text-foreground shadow-2xs font-semibold"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            전체 ({incompleteTodos.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setFilter("payment")}
+            className={`flex-1 py-1.5 text-xs rounded-lg font-medium transition-all ${
+              filter === "payment"
+                ? "bg-background text-foreground shadow-2xs font-semibold"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            입금만 ({incompleteTodos.filter((t) => t.type === "payment").length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setFilter("normal")}
+            className={`flex-1 py-1.5 text-xs rounded-lg font-medium transition-all ${
+              filter === "normal"
+                ? "bg-background text-foreground shadow-2xs font-semibold"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            일반 할일 ({incompleteTodos.filter((t) => t.type !== "payment").length})
+          </button>
         </div>
       </header>
 
-      <main className="flex-1">
+      {/* 메인 목록 영역 */}
+      <main className="flex-1 pb-6">
         {todos === null && (
-          <p className="py-10 text-center text-sm text-muted">불러오는 중...</p>
+          <div className="py-16 text-center">
+            <div className="inline-block size-6 animate-spin rounded-full border-2 border-primary border-t-transparent mb-2" />
+            <p className="text-sm text-muted-foreground">데이터를 불러오는 중...</p>
+          </div>
         )}
 
-        {todos !== null && todos.length === 0 && (
-          <p className="py-10 text-center text-sm text-muted">할일이 없습니다.</p>
+        {todos !== null && totalTodosCount === 0 && (
+          <div className="py-16 text-center flex flex-col items-center justify-center">
+            <div className="size-12 rounded-full bg-slate-100 dark:bg-muted flex items-center justify-center text-muted-foreground mb-3">
+              <CheckCircle2 className="size-6" />
+            </div>
+            <p className="font-semibold text-foreground">등록된 할일이 없습니다</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              하단 + 버튼을 눌러 새 할일을 추가해 보세요!
+            </p>
+          </div>
         )}
 
-        {todos !== null && todos.length > 0 && (
-          <div className="divide-y divide-border">
-            {incompleteTodos.map((todo) => (
+        {/* 미완료 목록 */}
+        {todos !== null && totalTodosCount > 0 && (
+          <div className="flex flex-col gap-2.5">
+            {filteredIncomplete.length === 0 && incompleteTodos.length > 0 && (
+              <p className="py-8 text-center text-xs text-muted-foreground">
+                선택한 필터 조건에 해당하는 할일이 없습니다.
+              </p>
+            )}
+
+            {filteredIncomplete.length === 0 && incompleteTodos.length === 0 && (
+              <div className="py-10 text-center rounded-2xl border border-dashed border-emerald-300 dark:border-emerald-900 bg-emerald-50/50 dark:bg-emerald-950/20 p-6">
+                <CheckCircle2 className="size-8 text-emerald-500 mx-auto mb-2" />
+                <p className="font-bold text-sm text-emerald-700 dark:text-emerald-300">
+                  모든 할일을 완료했습니다!
+                </p>
+                <p className="text-xs text-emerald-600/80 dark:text-emerald-400/70 mt-0.5">
+                  오늘 하루도 고생 많으셨습니다.
+                </p>
+              </div>
+            )}
+
+            {sortedIncomplete.map((todo) => (
               <TodoItem
                 key={todo.id}
                 todo={todo}
+                draggable
+                onDragStart={() => handleDragStart(todo.id)}
+                onDragOver={(e) => handleDragOver(e, todo.id)}
+                onDragLeave={() => {
+                  if (dragOverId === todo.id) setDragOverId(null);
+                }}
+                onDrop={(e) => handleDrop(e, todo.id)}
+                onDragEnd={handleDragEnd}
+                isDragging={draggedId === todo.id}
+                isDragOver={dragOverId === todo.id && draggedId !== todo.id}
                 onToggle={handleToggle}
                 onEdit={setEditingTodo}
                 onDelete={setDeletingTodo}
@@ -180,11 +441,16 @@ export default function Home() {
           </div>
         )}
 
-        {completedTodos.length > 0 && (
-          <div className="mt-6">
-            <h2 className="text-xs font-medium text-muted">완료</h2>
-            <div className="divide-y divide-border opacity-60">
-              {completedTodos.map((todo) => (
+        {/* 완료 목록 */}
+        {filteredCompleted.length > 0 && (
+          <div className="mt-8">
+            <div className="flex items-center justify-between mb-3 px-1">
+              <h2 className="text-xs font-bold text-muted-foreground tracking-wide uppercase">
+                완료된 항목 ({filteredCompleted.length})
+              </h2>
+            </div>
+            <div className="flex flex-col gap-2">
+              {filteredCompleted.map((todo) => (
                 <TodoItem
                   key={todo.id}
                   todo={todo}
@@ -199,14 +465,19 @@ export default function Home() {
         )}
       </main>
 
-      <button
-        type="button"
-        aria-label="할일 추가"
-        onClick={() => setShowAddForm(true)}
-        className="fixed bottom-24 right-5 flex h-14 w-14 items-center justify-center rounded-full bg-accent text-2xl text-white shadow-sm"
-      >
-        +
-      </button>
+      {/* Floating Action Button (FAB) */}
+      <div className="fixed bottom-20 left-0 right-0 pointer-events-none z-30">
+        <div className="max-w-lg mx-auto px-5 flex justify-end">
+          <Button
+            type="button"
+            aria-label="할일 추가"
+            onClick={() => setShowAddForm(true)}
+            className="pointer-events-auto h-14 w-14 rounded-full p-0 shadow-lg shadow-primary/30 bg-primary hover:bg-primary/90 text-primary-foreground hover:scale-105 active:scale-95 transition-all duration-200"
+          >
+            <Plus className="size-6 stroke-[2.5]" />
+          </Button>
+        </div>
+      </div>
 
       {showAddForm && (
         <TodoForm
@@ -230,8 +501,7 @@ export default function Home() {
           onCancel={() => setDeletingTodo(null)}
         />
       )}
-
-      <Toast message={toast} />
     </div>
   );
 }
+

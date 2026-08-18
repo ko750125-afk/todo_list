@@ -51,7 +51,13 @@ async function createPaymentTodoIfMissing(
 
   await runTransaction(db, async (transaction) => {
     const existing = await transaction.get(todoRef);
-    if (existing.exists()) return;
+    if (existing.exists()) {
+      const data = existing.data();
+      if (data && !data.paymentDay && payment.paymentDay) {
+        transaction.update(todoRef, { paymentDay: payment.paymentDay });
+      }
+      return;
+    }
 
     transaction.set(todoRef, {
       title: `${payment.recipient} 입금`,
@@ -59,11 +65,12 @@ async function createPaymentTodoIfMissing(
       type: "payment",
       paymentId: payment.id,
       amount: payment.amount,
-      bank: payment.bank,
-      accountNumber: payment.accountNumber,
+      bank: payment.bank || "",
+      accountNumber: payment.accountNumber || "",
       recipient: payment.recipient,
       year: occurrence.year,
       month: occurrence.month,
+      paymentDay: payment.paymentDay,
       createdAt: Timestamp.now(),
     });
   });

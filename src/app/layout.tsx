@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import BottomNavigation from "@/components/BottomNavigation";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -14,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "할일",
-  description: "할일과 정기입금을 관리합니다.",
+  title: "할일 & 정기입금 매니저",
+  description: "스마트한 할일 관리와 정기 계좌이체 입금 일정 알림",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -33,20 +34,30 @@ export const metadata: Metadata = {
 
 export const viewport = {
   themeColor: "#2563eb",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html
       lang="ko"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-background text-foreground">
-        <div className="flex flex-1 flex-col w-full max-w-xl mx-auto pb-20">
+      <body className="min-h-full bg-slate-100/60 font-sans text-foreground flex justify-center">
+        <div className="flex flex-1 flex-col w-full max-w-lg min-h-screen bg-background shadow-lg shadow-slate-200/50 relative pb-28">
           {children}
+          <BottomNavigation />
         </div>
-        <BottomNavigation />
+        <Toaster position="top-center" richColors closeButton />
       </body>
     </html>
   );
 }
+

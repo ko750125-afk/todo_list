@@ -14,6 +14,10 @@ export interface Todo {
   recipient?: string;
   year?: number;
   month?: number;
+  paymentDay?: number;
+  order?: number;
   createdAt: Timestamp;
   completedAt?: Timestamp;
 }
+
+
