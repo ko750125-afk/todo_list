@@ -289,9 +289,10 @@ export default function Home() {
   };
 
   return (
+  return (
     <div className="flex flex-1 flex-col px-4 sm:px-6">
-      {/* 상단 헤더 & 대시보드 요약 카드 */}
-      <header className="pt-7 pb-4">
+      {/* 상단 헤더 & 필터 탭 */}
+      <header className="pt-7 pb-3">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-foreground">
             Todo List
@@ -301,44 +302,7 @@ export default function Home() {
           </span>
         </div>
 
-        {/* 대시보드 카드 */}
-        <div className="mt-4 rounded-3xl bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 p-5 text-white shadow-md shadow-blue-500/20">
-          <div className="flex items-center justify-between text-blue-100">
-            <span className="text-xs font-medium flex items-center gap-1">
-              <CreditCard className="size-3.5" /> 이번 달 남은 입금액
-            </span>
-            <span className="text-xs bg-white/15 px-2 py-0.5 rounded-full backdrop-blur-xs font-medium">
-              미완료 {incompleteTodos.length}건
-            </span>
-          </div>
-
-          <div className="mt-2 text-3xl font-extrabold tracking-tight">
-            {formatCurrency(remainingPaymentTotal)}
-          </div>
-
-          {/* 진행 바 */}
-          {monthlyTotalPayment > 0 && (
-            <div className="mt-3.5">
-              <div className="flex justify-between text-[11px] text-blue-200/90 mb-1 font-medium">
-                <span>완료 {formatCurrency(completedPaymentTotal)}</span>
-                <span>총 {formatCurrency(monthlyTotalPayment)}</span>
-              </div>
-              <div className="h-1.5 w-full bg-white/20 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-white rounded-full transition-all duration-500"
-                  style={{
-                    width: `${Math.min(
-                      100,
-                      Math.round((completedPaymentTotal / monthlyTotalPayment) * 100)
-                    )}%`,
-                  }}
-                />
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* 필터 탭 */}
+        {/* 필터 탭 (최상단 배치) */}
         <div className="mt-4 flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-muted/60 rounded-xl">
           <button
             type="button"
@@ -376,8 +340,8 @@ export default function Home() {
         </div>
       </header>
 
-      {/* 메인 목록 영역 */}
-      <main className="flex-1 pb-6">
+      {/* 메인 목록 영역: 할일 & 입금이 가장 최상단 */}
+      <main className="flex-1 pb-6 pt-1">
         {todos === null && (
           <div className="py-16 text-center">
             <div className="inline-block size-6 animate-spin rounded-full border-2 border-primary border-t-transparent mb-2" />
@@ -397,7 +361,7 @@ export default function Home() {
           </div>
         )}
 
-        {/* 미완료 목록 */}
+        {/* 미완료 목록 (최상단 우선 노출) */}
         {todos !== null && totalTodosCount > 0 && (
           <div className="flex flex-col gap-2.5">
             {filteredIncomplete.length === 0 && incompleteTodos.length > 0 && (
@@ -441,9 +405,46 @@ export default function Home() {
           </div>
         )}
 
+        {/* 이번 달 남은 입금액 대시보드 카드 (완료된 항목 바로 위에 배치) */}
+        <div className="mt-8 rounded-3xl bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 p-5 text-white shadow-md shadow-blue-500/20">
+          <div className="flex items-center justify-between text-blue-100">
+            <span className="text-xs font-medium flex items-center gap-1">
+              <CreditCard className="size-3.5" /> 이번 달 남은 입금액
+            </span>
+            <span className="text-xs bg-white/15 px-2 py-0.5 rounded-full backdrop-blur-xs font-medium">
+              미완료 {incompleteTodos.length}건
+            </span>
+          </div>
+
+          <div className="mt-2 text-3xl font-extrabold tracking-tight">
+            {formatCurrency(remainingPaymentTotal)}
+          </div>
+
+          {/* 진행 바 */}
+          {monthlyTotalPayment > 0 && (
+            <div className="mt-3.5">
+              <div className="flex justify-between text-[11px] text-blue-200/90 mb-1 font-medium">
+                <span>완료 {formatCurrency(completedPaymentTotal)}</span>
+                <span>총 {formatCurrency(monthlyTotalPayment)}</span>
+              </div>
+              <div className="h-1.5 w-full bg-white/20 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-white rounded-full transition-all duration-500"
+                  style={{
+                    width: `${Math.min(
+                      100,
+                      Math.round((completedPaymentTotal / monthlyTotalPayment) * 100)
+                    )}%`,
+                  }}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* 완료 목록 */}
         {filteredCompleted.length > 0 && (
-          <div className="mt-8">
+          <div className="mt-6">
             <div className="flex items-center justify-between mb-3 px-1">
               <h2 className="text-xs font-bold text-muted-foreground tracking-wide uppercase">
                 완료된 항목 ({filteredCompleted.length})
