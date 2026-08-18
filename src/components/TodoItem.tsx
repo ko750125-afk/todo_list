@@ -94,19 +94,8 @@ export default function TodoItem({
           {todo.completed && <Check className="size-3.5 stroke-[3]" />}
         </button>
 
-        {/* 메인 내용 영역 */}
-        <div
-          role="button"
-          tabIndex={0}
-          onClick={() => onEdit(todo)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              onEdit(todo);
-            }
-          }}
-          className="min-w-0 flex-1 cursor-pointer text-left"
-        >
+        {/* 메인 내용 영역 (클릭 편집 제거) */}
+        <div className="min-w-0 flex-1 text-left">
           <div className="flex items-center gap-2 flex-wrap">
             {isPayment && (
               <>
@@ -193,18 +182,8 @@ export default function TodoItem({
           )}
         </div>
 
-        {/* 액션 버튼 */}
-        <div className="flex items-center gap-0.5 shrink-0 opacity-80 group-hover:opacity-100 transition-opacity">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            aria-label="수정"
-            onClick={() => onEdit(todo)}
-            className="h-8 w-8 text-muted-foreground hover:text-foreground rounded-lg"
-          >
-            <Edit2 className="size-3.5" />
-          </Button>
+        {/* 액션 버튼 (삭제만 유지) */}
+        <div className="flex items-center shrink-0 opacity-80 group-hover:opacity-100 transition-opacity">
           <Button
             type="button"
             variant="ghost"
