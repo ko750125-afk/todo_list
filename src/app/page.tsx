@@ -14,13 +14,12 @@ import {
   updateDoc,
   writeBatch,
 } from "firebase/firestore";
-import { Plus, CheckCircle2, ListFilter, CreditCard, Sparkles } from "lucide-react";
+import { Plus, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { db, TODOS_COLLECTION, RECURRING_PAYMENTS_COLLECTION } from "@/lib/firebase";
 import type { Todo } from "@/types/todo";
 import type { RecurringPayment } from "@/types/recurringPayment";
 import { generateDueRecurringTodos } from "@/utils/recurringTodo";
-import { formatCurrency } from "@/utils/format";
 import TodoItem from "@/components/TodoItem";
 import TodoForm from "@/components/TodoForm";
 import ConfirmDialog from "@/components/ConfirmDialog";
@@ -98,29 +97,6 @@ export default function Home() {
     () => (todos ?? []).filter((t) => t.completed),
     [todos]
   );
-
-  // 이번 달 남은 입금 및 총 입금 계산 (정기입금 원본 기준 + 실시간 남은 입금액)
-  const { remainingPaymentTotal, monthlyTotalPayment, completedPaymentTotal } = useMemo(() => {
-    // 1. 활성화된 정기입금 원본 총합
-    const activeRecurringTotal = Array.from(recurringMap.values())
-      .filter((p) => p.active !== false)
-      .reduce((sum, p) => sum + (p.amount ?? 0), 0);
-
-    // 2. 현재 남아있는 미완료 입금 카드의 총합
-    const remaining = (todos ?? [])
-      .filter((t) => t.type === "payment" && !t.completed)
-      .reduce((sum, t) => sum + (t.amount ?? 0), 0);
-
-    // 정기입금 원본 총합이 있으면 그것을 총액으로 하고, 없으면 남아있는 금액 기준
-    const total = activeRecurringTotal > 0 ? activeRecurringTotal : remaining;
-    const completed = Math.max(0, total - remaining);
-
-    return {
-      monthlyTotalPayment: total,
-      remainingPaymentTotal: remaining,
-      completedPaymentTotal: completed,
-    };
-  }, [todos, recurringMap]);
 
   // 필터링 적용
   const filteredIncomplete = useMemo(() => {
@@ -428,51 +404,21 @@ export default function Home() {
           </div>
         )}
 
-        {/* 이번 달 남은 입금액 대시보드 카드 (연한 하늘색 테마) */}
-        <div className="mt-8 rounded-3xl bg-gradient-to-br from-sky-50 via-sky-100/70 to-blue-100/60 dark:from-sky-950/40 dark:via-blue-950/30 dark:to-sky-900/30 p-5 border border-sky-200/80 dark:border-sky-800/50 shadow-xs">
-          <div className="flex items-center justify-between text-sky-900/80 dark:text-sky-200">
-            <span className="text-xs font-semibold flex items-center gap-1.5">
-              <CreditCard className="size-4 text-sky-600 dark:text-sky-400" /> 이번 달 남은 입금액
-            </span>
-            <span className="text-xs bg-sky-200/70 dark:bg-sky-900/70 text-sky-800 dark:text-sky-200 px-2.5 py-0.5 rounded-full font-semibold">
-              미완료 {incompleteTodos.length}건
-            </span>
-          </div>
-
-          <div className="mt-2 text-3xl font-extrabold tracking-tight text-sky-950 dark:text-sky-50 font-mono">
-            {formatCurrency(remainingPaymentTotal)}
-          </div>
-
-          {/* 진행 바 */}
-          {monthlyTotalPayment > 0 && (
-            <div className="mt-3.5">
-              <div className="flex justify-between text-[11px] text-sky-700/80 dark:text-sky-300/80 mb-1.5 font-semibold">
-                <span>완료 {formatCurrency(completedPaymentTotal)}</span>
-                <span>총 {formatCurrency(monthlyTotalPayment)}</span>
-              </div>
-              <div className="h-1.5 w-full bg-sky-200/80 dark:bg-sky-950 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-sky-500 dark:bg-sky-400 rounded-full transition-all duration-500"
-                  style={{
-                    width: `${Math.min(
-                      100,
-                      Math.round((completedPaymentTotal / monthlyTotalPayment) * 100)
-                    )}%`,
-                  }}
-                />
-              </div>
-            </div>
-          )}
-        </div>
-
         {/* 완료 목록 */}
         {filteredCompleted.length > 0 && (
-          <div className="mt-6">
-            <div className="flex items-center justify-between mb-3 px-1">
-              <h2 className="text-xs font-bold text-muted-foreground tracking-wide uppercase">
-                완료된 항목 ({filteredCompleted.length})
-              </h2>
+          <div className="mt-8">
+            {/* 할일과 완료된 항목 사이 깔끔한 실선 구분선 */}
+            <div className="relative mb-5">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-slate-200 dark:border-border/80" />
+              </div>
+              <div className="relative flex justify-center">
+                <span className="bg-background px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  완료된 항목 ({filteredCompleted.length})
+                </span>
+              </div>
             </div>
+
             <div className="flex flex-col gap-2">
               {filteredCompleted.map((todo) => (
                 <TodoItem
