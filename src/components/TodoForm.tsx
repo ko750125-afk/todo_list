@@ -12,6 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { useDraggableModal } from "@/hooks/useDraggableModal";
 
 interface NewTodoInput {
   title: string;
@@ -99,9 +100,34 @@ export default function TodoForm({ todo, recurringPayments, onSubmit, onClose }:
     ? Number(amount.replace(/,/g, "")).toLocaleString("ko-KR")
     : "";
 
+  const { modalStyle, dragHandleProps, offset, handleResetPosition } = useDraggableModal();
+
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-md rounded-3xl p-6">
+      <DialogContent
+        style={modalStyle}
+        className="sm:max-w-md rounded-3xl p-6 overflow-hidden shadow-2xl"
+      >
+        {/* 모바일/PC 드래그 핸들러 */}
+        <div
+          {...dragHandleProps}
+          className="flex flex-col items-center justify-center -mt-3 -mx-6 pt-3 pb-2 select-none border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/80 dark:bg-zinc-900/80 cursor-grab active:cursor-grabbing mb-3"
+        >
+          <div className="w-12 h-1.5 rounded-full bg-zinc-300 dark:bg-zinc-700 hover:bg-zinc-400 dark:hover:bg-zinc-600 transition-colors" />
+          <div className="flex items-center justify-between w-full px-6 mt-1 text-[11px] text-zinc-400 font-medium">
+            <span>🖐️ 팝업을 드래그하여 옮길 수 있습니다</span>
+            {(offset.x !== 0 || offset.y !== 0) && (
+              <button
+                type="button"
+                onClick={handleResetPosition}
+                className="text-zinc-600 dark:text-zinc-300 font-semibold hover:underline"
+              >
+                원위치
+              </button>
+            )}
+          </div>
+        </div>
+
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold">
